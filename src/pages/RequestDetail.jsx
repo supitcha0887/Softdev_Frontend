@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Card, Pill } from "../components/UI.jsx";
 import { requests, STATUS, statusTone } from "../data/mock.js";
-import inprogress from "../assets/inprogress.png";
+import inprogress from "../assets/inprogress.svg";
 import complete from "../assets/complete.png";
 
 export default function RequestDetail() {

@@ -1,7 +1,8 @@
-import new_work from "../assets/new_work.png";
-import pending from "../assets/pending.png";
-import progress from "../assets/progress.png";
-import finish from "../assets/finish.png";
+import new_work from "../assets/new_work.svg";
+import pending from "../assets/pending.svg";
+import progress from "../assets/progress.svg";
+import finish from "../assets/finish.svg";
+
 export const STATUS = {
   // UI requirement: show "เร่งด่วน" instead of "ใหม่"
   NEW: "เร่งด่วน",

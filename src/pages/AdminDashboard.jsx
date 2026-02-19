@@ -97,8 +97,8 @@ export default function AdminDashboard() {
             <div className="workload">
               <div className="work-row work-blue">
                 <div>
-                  <div className="work-name">รับผิดชอบวันนี้</div>
-                  <div className="work-sub">Accepted by me</div>
+                  <div className="work-name">รับผิดชอบโดยฉัน</div>
+                  <div className="work-sub-1">Accepted by me</div>
                 </div>
                 <div className="work-num">5</div>
               </div>
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
               <div className="work-row work-amber">
                 <div>
                   <div className="work-name">เหลือวันนี้</div>
-                  <div className="work-sub">Remaining today</div>
+                  <div className="work-sub-2">Remaining today</div>
                 </div>
                 <div className="work-num">3</div>
               </div>
