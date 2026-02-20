@@ -9,10 +9,33 @@ import locationIcon from "./assets/Location.png";
 import closeIcon from "./assets/Close.png";
 import RepairCard from "./RepairCard";
 import { useNavigate } from "react-router-dom";
-import { supabase, getAccessToken } from './supabaseClient';
+import { supabase, getAccessToken } from "./supabaseClient";
 
 // ================= DETAIL POPUP COMPONENT =================
 function Detail({ item, onClose }) {
+  const handleViewDetail = async (item) => {
+    setSelectedItem(item); // แสดง Modal เบื้องต้นก่อน
+
+    if (item.asset_id) {
+      try {
+        const token = await getAccessToken();
+        const response = await fetch(
+          `http://localhost:5000/api/Asset/${item.asset_id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (response.ok) {
+          const assetData = await response.json();
+          // อัปเดตข้อมูล Asset เข้าไปใน selectedItem เพื่อนำไปโชว์ใน Modal
+          setSelectedItem((prev) => ({ ...prev, assetDetails: assetData }));
+        }
+      } catch (error) {
+        console.error("Error fetching asset details:", error);
+      }
+    }
+  };
   if (!item) return null;
 
   // ปรับให้ตรงกับสถานะใน Database
@@ -36,7 +59,11 @@ function Detail({ item, onClose }) {
         </button>
 
         <div className={styles.detailImageWrapper}>
-          <img src={item.image} alt={item.title} className={styles.detailImage} />
+          <img
+            src={item.image}
+            alt={item.title}
+            className={styles.detailImage}
+          />
           <div
             className={styles.detailStatusBadge}
             style={{ background: statusColor[item.status] ?? "#888" }}
@@ -47,7 +74,9 @@ function Detail({ item, onClose }) {
 
         <div className={styles.detailBody}>
           <h3 className={styles.detailTitle}>{item.title}</h3>
-          <p className={styles.detailMeta}>เลขครุภัณฑ์ : {item.assetNo ?? "ไม่ระบุ"}</p>
+          <p className={styles.detailMeta}>
+            เลขครุภัณฑ์ : {item.assetNo ?? "ไม่ระบุ"}
+          </p>
           <p className={styles.detailMeta}>วันที่แจ้งซ่อม : {item.date}</p>
 
           <hr className={styles.detailDivider} />
@@ -59,7 +88,9 @@ function Detail({ item, onClose }) {
                 <img src={engineerIcon} alt="reporter" />
               </div>
               <div>
-                <span style={{ fontSize: "16px", fontWeight: 600 }}>{item.reporterName}</span>
+                <span style={{ fontSize: "16px", fontWeight: 600 }}>
+                  {item.reporterName}
+                </span>
               </div>
             </div>
           </div>
@@ -73,7 +104,13 @@ function Detail({ item, onClose }) {
                 <img src={maintainIcon} alt="status" />
               </div>
               <div>
-                <span style={{ fontSize: "16px", color: statusColor[item.status] ?? "#888", fontWeight: "700" }}>
+                <span
+                  style={{
+                    fontSize: "16px",
+                    color: statusColor[item.status] ?? "#888",
+                    fontWeight: "700",
+                  }}
+                >
                   {statusLabel[item.status] ?? item.status}
                 </span>
               </div>
@@ -94,7 +131,9 @@ function Detail({ item, onClose }) {
             </div>
           </div>
 
-          <button className={styles.closeBtn} onClick={onClose}>ปิดหน้าต่าง</button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            ปิดหน้าต่าง
+          </button>
         </div>
       </div>
     </div>
@@ -113,9 +152,9 @@ function Report() {
     try {
       setLoading(true);
       const token = await getAccessToken();
-      
+
       if (!token) {
-        navigate("/"); 
+        navigate("/");
         return;
       }
 
@@ -123,25 +162,27 @@ function Report() {
       const response = await fetch("http://localhost:5000/api/Repair/all", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         // Mapping ข้อมูลจาก Database เข้ากับรูปแบบที่ Component ต้องการ
-        const mappedData = data.map(item => ({
+        const mappedData = data.map((item) => ({
           id: item.id,
           title: item.title,
           status: item.status, // pending, in_progress, completed
           image: item.image || "https://via.placeholder.com/150",
-          date: new Date(item.date).toLocaleDateString('th-TH', {
-              day: 'numeric', month: 'short', year: 'numeric'
+          date: new Date(item.date).toLocaleDateString("th-TH", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
           }),
           reporterName: item.reporter_name || "ไม่ระบุชื่อ",
           location: "ภาควิชาคอมพิวเตอร์ อาคาร ECC", // หรือ item.location_name ถ้ามีการ JOIN มา
-          assetNo: item.asset_id ? "มีข้อมูล" : "ไม่ระบุ"
+          assetNo: item.asset_id ? "มีข้อมูล" : "ไม่ระบุ",
         }));
         setRepairItems(mappedData);
       } else {
@@ -162,7 +203,12 @@ function Report() {
     <div className={styles.container}>
       {/* ================= NAVBAR ================= */}
       <div className={styles.navbar}>
-        <img src={icon} className={styles.logo} onClick={() => navigate("/home")} alt="icon" />
+        <img
+          src={icon}
+          className={styles.logo}
+          onClick={() => navigate("/home")}
+          alt="icon"
+        />
         <div className={styles.searchBox}>
           <input type="text" placeholder="Search here" />
           <img src={searchIcon} alt="search" />
@@ -170,7 +216,12 @@ function Report() {
         <div className={styles.navLinks}>
           <span onClick={() => navigate("/home")}>Home</span>
           <span onClick={() => fetchRepairs()}>List</span>
-          <button className={styles.signin} onClick={() => supabase.auth.signOut().then(() => navigate("/"))}>Sign out</button>
+          <button
+            className={styles.signin}
+            onClick={() => supabase.auth.signOut().then(() => navigate("/"))}
+          >
+            Sign out
+          </button>
         </div>
       </div>
 
@@ -181,7 +232,12 @@ function Report() {
           <br />
           ภาควิชาคอมพิวเตอร์ อาคาร ECC
         </h1>
-        <button className={styles.reportBtn} onClick={() => navigate("/create-report")}>Report</button>
+        <button
+          className={styles.reportBtn}
+          onClick={() => navigate("/create-report")}
+        >
+          Report
+        </button>
       </div>
 
       {/* ================= LIST SECTION ================= */}
@@ -191,29 +247,41 @@ function Report() {
           <div className={styles.sidebar}>
             <h4>Sort by</h4>
             <p>สถานะ</p>
-            <label><input type="checkbox" /> รอซ่อม</label>
-            <label><input type="checkbox" /> กำลังดำเนินการ</label>
-            <label><input type="checkbox" /> เสร็จสิ้น</label>
+            <label>
+              <input type="checkbox" /> รอซ่อม
+            </label>
+            <label>
+              <input type="checkbox" /> กำลังดำเนินการ
+            </label>
+            <label>
+              <input type="checkbox" /> เสร็จสิ้น
+            </label>
           </div>
 
           {/* RIGHT CONTENT */}
           <div className={styles.rightContent}>
             <h3>รายการแจ้งซ่อมทั้งหมดจากฐานข้อมูล</h3>
-            
+
             {loading ? (
               <div className={styles.loader}>กำลังโหลดข้อมูลจากระบบ...</div>
             ) : (
               <div className={styles.grid}>
-                {repairItems.length > 0 ? repairItems.map((item, index) => (
-                  <div key={index} onClick={() => setSelectedItem(item)} style={{ cursor: "pointer" }}>
-                    <RepairCard
-                      image={item.image}
-                      title={item.title}
-                      status={item.status}
-                      date={item.date}
-                    />
-                  </div>
-                )) : (
+                {repairItems.length > 0 ? (
+                  repairItems.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedItem(item)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <RepairCard
+                        image={item.image}
+                        title={item.title}
+                        status={item.status}
+                        date={item.date}
+                      />
+                    </div>
+                  ))
+                ) : (
                   <p>ไม่พบรายการแจ้งซ่อมในระบบ</p>
                 )}
               </div>
