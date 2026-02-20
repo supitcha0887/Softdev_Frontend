@@ -32,6 +32,9 @@ function LoginPage() {
       if (error) throw error;
 
       const token = data.session.access_token;
+      console.log("================== SUPABASE TOKEN ==================");
+      console.log(token);
+      console.log("====================================================");
       localStorage.setItem("token", token); // เก็บ Token ไว้ใช้ในหน้าอื่นๆ
 
       // 2. ตรวจสอบการเชื่อมต่อกับ Backend (ASP.NET)

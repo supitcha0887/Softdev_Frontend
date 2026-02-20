@@ -13,29 +13,6 @@ import { supabase, getAccessToken } from "./supabaseClient";
 
 // ================= DETAIL POPUP COMPONENT =================
 function Detail({ item, onClose }) {
-  const handleViewDetail = async (item) => {
-    setSelectedItem(item); // แสดง Modal เบื้องต้นก่อน
-
-    if (item.asset_id) {
-      try {
-        const token = await getAccessToken();
-        const response = await fetch(
-          `http://localhost:5000/api/Asset/${item.asset_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-
-        if (response.ok) {
-          const assetData = await response.json();
-          // อัปเดตข้อมูล Asset เข้าไปใน selectedItem เพื่อนำไปโชว์ใน Modal
-          setSelectedItem((prev) => ({ ...prev, assetDetails: assetData }));
-        }
-      } catch (error) {
-        console.error("Error fetching asset details:", error);
-      }
-    }
-  };
   if (!item) return null;
 
   // ปรับให้ตรงกับสถานะใน Database
@@ -75,9 +52,19 @@ function Detail({ item, onClose }) {
         <div className={styles.detailBody}>
           <h3 className={styles.detailTitle}>{item.title}</h3>
           <p className={styles.detailMeta}>
-            เลขครุภัณฑ์ : {item.assetNo ?? "ไม่ระบุ"}
+            เลขครุภัณฑ์ : {item.assetNo || "ไม่ระบุ"}
           </p>
           <p className={styles.detailMeta}>วันที่แจ้งซ่อม : {item.date}</p>
+
+          <hr className={styles.detailDivider} />
+
+          {/* รายละเอียดเพิ่มเติมจาก Database */}
+          <div className={styles.section}>
+            <p className={styles.sectionTitle}>รายละเอียดปัญหา</p>
+            <p className={styles.detailDesc}>
+              {item.description || "ไม่มีรายละเอียดเพิ่มเติม"}
+            </p>
+          </div>
 
           <hr className={styles.detailDivider} />
 
@@ -98,7 +85,7 @@ function Detail({ item, onClose }) {
           <hr className={styles.detailDivider} />
 
           <div className={styles.section}>
-            <p className={styles.sectionTitle}>ข้อมูลการดำเนินการ</p>
+            <p className={styles.sectionTitle}>สถานะการดำเนินการ</p>
             <div className={styles.row}>
               <div className={styles.iconCircle}>
                 <img src={maintainIcon} alt="status" />
@@ -120,13 +107,13 @@ function Detail({ item, onClose }) {
           <hr className={styles.detailDivider} />
 
           <div className={styles.section}>
-            <p className={styles.sectionTitle}>ที่อยู่ในการซ่อมบำรุง</p>
+            <p className={styles.sectionTitle}>สถานที่ซ่อมบำรุง</p>
             <div className={styles.row}>
               <div className={styles.iconCircle}>
                 <img src={locationIcon} alt="location" />
               </div>
               <span style={{ fontSize: "15px", color: "#444" }}>
-                {item.location ?? "อาคาร ECC"}
+                {item.location}
               </span>
             </div>
           </div>
@@ -147,7 +134,7 @@ function Report() {
   const [repairItems, setRepairItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ฟังก์ชันดึงข้อมูลจากหลังบ้าน (ASP.NET)
+  // 1. ดึงรายการทั้งหมดเพื่อแสดงใน Grid
   const fetchRepairs = async () => {
     try {
       setLoading(true);
@@ -158,8 +145,7 @@ function Report() {
         return;
       }
 
-      // เรียก API /all เพื่อดูทั้งหมด (หรือ /list เพื่อดูเฉพาะของตัวเอง)
-      const response = await fetch("http://localhost:5000/api/Repair/all", {
+      const response = await fetch("http://localhost:5000/api/Report/All", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -169,11 +155,10 @@ function Report() {
 
       if (response.ok) {
         const data = await response.json();
-        // Mapping ข้อมูลจาก Database เข้ากับรูปแบบที่ Component ต้องการ
         const mappedData = data.map((item) => ({
           id: item.id,
           title: item.title,
-          status: item.status, // pending, in_progress, completed
+          status: item.status,
           image: item.image || "https://via.placeholder.com/150",
           date: new Date(item.date).toLocaleDateString("th-TH", {
             day: "numeric",
@@ -181,17 +166,46 @@ function Report() {
             year: "numeric",
           }),
           reporterName: item.reporter_name || "ไม่ระบุชื่อ",
-          location: "ภาควิชาคอมพิวเตอร์ อาคาร ECC", // หรือ item.location_name ถ้ามีการ JOIN มา
-          assetNo: item.asset_id ? "มีข้อมูล" : "ไม่ระบุ",
+          // ✅ ดึงชื่อสถานที่จริงมาใช้จากการ JOIN หลังบ้าน
+          location: item.location_name || "ไม่ระบุสถานที่",
+          assetNo: item.asset_number || null,
         }));
         setRepairItems(mappedData);
-      } else {
-        console.error("Fetch failed with status:", response.status);
       }
     } catch (error) {
       console.error("Error connecting to server:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 2. ดึงข้อมูลฉบับเต็มเมื่อคลิกดู Detail (รวม Description)
+  const handleOpenDetail = async (item) => {
+    // เซ็ตข้อมูลเบื้องต้นที่มีอยู่แล้วเพื่อให้ UI ตอบสนองทันที
+    setSelectedItem(item);
+
+    try {
+      const token = await getAccessToken();
+      const response = await fetch(
+        `http://localhost:5000/api/Report/${item.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (response.ok) {
+        const fullData = await response.json();
+        // อัปเดต State ด้วยรายละเอียดเพิ่มเติม (เช่น description)
+        setSelectedItem((prev) => ({
+          ...prev,
+          description: fullData.description,
+          // อัปเดตชื่อสถานที่และผู้แจ้งให้แน่นอนอีกครั้ง
+          location: fullData.location_name || prev.location,
+          reporterName: fullData.reporterName || prev.reporterName,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching full details:", error);
     }
   };
 
@@ -201,7 +215,7 @@ function Report() {
 
   return (
     <div className={styles.container}>
-      {/* ================= NAVBAR ================= */}
+      {/* NAVBAR */}
       <div className={styles.navbar}>
         <img
           src={icon}
@@ -215,7 +229,7 @@ function Report() {
         </div>
         <div className={styles.navLinks}>
           <span onClick={() => navigate("/home")}>Home</span>
-          <span onClick={() => fetchRepairs()}>List</span>
+          <span onClick={fetchRepairs}>List</span>
           <button
             className={styles.signin}
             onClick={() => supabase.auth.signOut().then(() => navigate("/"))}
@@ -225,7 +239,7 @@ function Report() {
         </div>
       </div>
 
-      {/* ================= HERO ================= */}
+      {/* HERO */}
       <div className={styles.hero} style={{ backgroundImage: `url(${bg})` }}>
         <h1>
           ระบบรายงานครุภัณฑ์เสียหายภายใน
@@ -240,10 +254,9 @@ function Report() {
         </button>
       </div>
 
-      {/* ================= LIST SECTION ================= */}
+      {/* CONTENT */}
       <div className={styles.listSection}>
         <div className={styles.content}>
-          {/* SIDEBAR */}
           <div className={styles.sidebar}>
             <h4>Sort by</h4>
             <p>สถานะ</p>
@@ -258,45 +271,37 @@ function Report() {
             </label>
           </div>
 
-          {/* RIGHT CONTENT */}
           <div className={styles.rightContent}>
             <h3>รายการแจ้งซ่อมทั้งหมดจากฐานข้อมูล</h3>
-
             {loading ? (
-              <div className={styles.loader}>กำลังโหลดข้อมูลจากระบบ...</div>
+              <div className={styles.loader}>กำลังโหลดข้อมูล...</div>
             ) : (
               <div className={styles.grid}>
-                {repairItems.length > 0 ? (
-                  repairItems.map((item, index) => (
-                    <div
-                      key={index}
-                      onClick={() => setSelectedItem(item)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <RepairCard
-                        image={item.image}
-                        title={item.title}
-                        status={item.status}
-                        date={item.date}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p>ไม่พบรายการแจ้งซ่อมในระบบ</p>
-                )}
+                {repairItems.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleOpenDetail(item)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <RepairCard
+                      image={item.image}
+                      title={item.title}
+                      status={item.status}
+                      date={item.date}
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ================= FOOTER ================= */}
       <div className={styles.footer}>
         <p>ระบบรายงานครุภัณฑ์เสียหายภายในภาควิชาคอมพิวเตอร์ อาคาร ECC</p>
         <span>Copyright ©2026 CEDT | PSPD Project</span>
       </div>
 
-      {/* ================= DETAIL MODAL ================= */}
       {selectedItem && (
         <Detail item={selectedItem} onClose={() => setSelectedItem(null)} />
       )}
