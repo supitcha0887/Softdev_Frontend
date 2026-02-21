@@ -39,7 +39,7 @@ function LoginPage() {
 
       // 2. ตรวจสอบการเชื่อมต่อกับ Backend (ASP.NET)
       // เปลี่ยนจาก GET เป็น POST และส่ง JSON Body ให้ตรงกับ LoginRequest ใน C#
-      const res = await fetch("http://localhost:5000/api/Auth/verify-token", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Auth/verify-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,7 +1,7 @@
-import new_work from "../assets/new_work.svg";
-import pending from "../assets/pending.svg";
-import progress from "../assets/progress.svg";
-import finish from "../assets/finish.svg";
+import new_work from "../src/assets/new_work.svg";
+import pending from "../src/assets/pending.svg";
+import progress from "../src/assets/progress.svg";
+import finish from "../src/assets/finish.svg";
 
 export const STATUS = {
   // UI requirement: show "เร่งด่วน" instead of "ใหม่"
@@ -15,20 +15,18 @@ export const statusTone = (s) => {
   if (s === STATUS.DONE) return "ok";
 
   // ✅ สีสถานะให้เหมือนกันทุกหน้า (Dashboard + Manage Requests)
-  if (s === STATUS.PROGRESS) return "warn";  // เหลือง
-  if (s === STATUS.PENDING) return "muted";  // เทา
+  if (s === STATUS.PROGRESS) return "warn"; // เหลือง
+  if (s === STATUS.PENDING) return "muted"; // เทา
   if (s === STATUS.DONE) return "ok";
   if (s === STATUS.CANCELED) return "bad";
 
   return "muted";
-
 };
 
 export const statusToneList = (s) => {
   // กันพังไว้ เผื่อหน้าเดิมยังเรียกใช้ชื่อเดิม
   return statusTone(s);
 };
-
 
 export const requests = [
   {
@@ -63,7 +61,8 @@ export const requests = [
     status: STATUS.PROGRESS,
     assigned: "STAFF-0004",
     img: "https://images.unsplash.com/photo-1526666923127-b2970f64b422?auto=format&fit=crop&w=1400&q=60",
-    description: "โปรเจคเตอร์ไม่ทำงานเมื่อกดปุ่มเปิดเครื่อง มีไฟขึ้นแต่ไม่มีเสียงพัดลม และไม่แสดงภาพ",
+    description:
+      "โปรเจคเตอร์ไม่ทำงานเมื่อกดปุ่มเปิดเครื่อง มีไฟขึ้นแต่ไม่มีเสียงพัดลม และไม่แสดงภาพ",
   },
   {
     id: "REQ-2024-003",
@@ -102,11 +101,38 @@ export const requests = [
 ];
 
 export const stats = [
-  { labelTH: "คำขอใหม่", labelEN: "New Requests", value: 12, pill: "NEW", tone: "muted",
-    icon: new_work },
-  { labelTH: "รอรับงาน", labelEN: "Pending", value: 8, pill: "PENDING", tone: "warn", icon: pending },
-  { labelTH: "กำลังดำเนินการ", labelEN: "In Progress", value: 15, pill: "PROGRESS", tone: "progress", icon: progress },
-  { labelTH: "เสร็จสิ้น", labelEN: "Completed", value: 24, pill: "DONE", tone: "ok", icon: finish },
+  {
+    labelTH: "คำขอใหม่",
+    labelEN: "New Requests",
+    value: 12,
+    pill: "NEW",
+    tone: "muted",
+    icon: new_work,
+  },
+  {
+    labelTH: "รอรับงาน",
+    labelEN: "Pending",
+    value: 8,
+    pill: "PENDING",
+    tone: "warn",
+    icon: pending,
+  },
+  {
+    labelTH: "กำลังดำเนินการ",
+    labelEN: "In Progress",
+    value: 15,
+    pill: "PROGRESS",
+    tone: "progress",
+    icon: progress,
+  },
+  {
+    labelTH: "เสร็จสิ้น",
+    labelEN: "Completed",
+    value: 24,
+    pill: "DONE",
+    tone: "ok",
+    icon: finish,
+  },
 ];
 
 export const notifications = [
@@ -119,7 +145,7 @@ export const notifications = [
     timeAgo: "2 นาทีที่แล้ว",
     title: "การแจ้งซ่อมใหม่ - ห้อง A301",
     desc: "เครื่องปรับอากาศไม่เย็น ต้องการซ่อมด่วน",
-    requestId: requests[0]?.id,   // ✅ ใช้ id จริงจาก requests
+    requestId: requests[0]?.id, // ✅ ใช้ id จริงจาก requests
   },
   {
     id: "n2",
