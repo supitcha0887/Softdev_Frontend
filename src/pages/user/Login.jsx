@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import "./Login.css";
-import bg from "./assets/BG.jpg";
-import mailIcon from "./assets/Mail.png";
-import eyeIcon from "./assets/Eyes.png";
+import bg from "../../assets/BG.jpg";
+import mailIcon from "../../assets/Mail.png";
+import eyeIcon from "../../assets/Eyes.png";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../../supabaseClient";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="container" style={{ backgroundImage: `url(${bg})` }}>
+    <div className="login-container" style={{ backgroundImage: `url(${bg})` }}>
       {/* LEFT SIDE (OVERLAY) */}
       <div className="overlay">
         <p>We happy to help</p>

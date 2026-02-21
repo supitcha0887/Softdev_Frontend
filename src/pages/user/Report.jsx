@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import styles from "./Report.module.css";
-import icon from "./assets/Icon.png";
-import searchIcon from "./assets/Search.jpg";
-import bg from "./assets/BG.jpg";
-import engineerIcon from "./assets/Engineer.png";
-import maintainIcon from "./assets/Maintain.png";
-import locationIcon from "./assets/Location.png";
-import closeIcon from "./assets/Close.png";
-import notificationIcon from "./assets/Notification.png";
-import RepairCard from "./RepairCard";
+import bg from "../../assets/BG.jpg";
+import engineerIcon from "../../assets/Engineer.png";
+import maintainIcon from "../../assets/Maintain.png";
+import locationIcon from "../../assets/Location.png";
+import closeIcon from "../../assets/Close.png";
+import RepairCard from "../../components/RepairCard";
 import { useNavigate } from "react-router-dom";
-import { supabase, getAccessToken } from "./supabaseClient";
+import { supabase, getAccessToken } from "../../supabaseClient";
+import UserNavbar from "../../components/UserNavbar";
 
 // ================= DETAIL POPUP COMPONENT =================
 function Detail({ item, onClose }) {
@@ -134,7 +132,6 @@ function Report() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [repairItems, setRepairItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState("");
   const [filters, setFilters] = useState({
     pending: false,
     in_progress: false,
@@ -163,13 +160,16 @@ function Report() {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Report/All`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/Report/All`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -177,7 +177,9 @@ function Report() {
           id: item.id,
           title: item.title,
           status: item.status,
-          image: item.image || "https://t3.ftcdn.net/jpg/10/22/24/80/360_F_1022248039_7LDxHRi3Mlt9BK3wzLBUGZp9XAO1gt2s.jpg",
+          image:
+            item.image ||
+            "https://t3.ftcdn.net/jpg/10/22/24/80/360_F_1022248039_7LDxHRi3Mlt9BK3wzLBUGZp9XAO1gt2s.jpg",
           date: new Date(item.date).toLocaleDateString("th-TH", {
             day: "numeric",
             month: "short",
@@ -229,54 +231,11 @@ function Report() {
 
   useEffect(() => {
     fetchRepairs();
-
-    // ดึงชื่อผู้ใช้จาก Supabase session
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // ดึงจาก user_metadata ที่ส่งตอน Register (full_name)
-        const name = user.user_metadata?.full_name || user.email || "User";
-        setUserName(name);
-      }
-    };
-    fetchUser();
   }, []);
 
   return (
     <div className={styles.container}>
-      {/* NAVBAR */}
-      <div className={styles.navbar}>
-        <img
-          src={icon}
-          className={styles.logo}
-          onClick={() => navigate("/home")}
-          alt="icon"
-        />
-        <div className={styles.searchBox}>
-          <input type="text" placeholder="Search here" />
-          <img src={searchIcon} alt="search" />
-        </div>
-        <div className={styles.navLinks}>
-          <span onClick={() => navigate("/home")}>Home</span>
-          <span onClick={fetchRepairs}>List</span>
-          {/* ปุ่ม Notification */}
-          <button className={styles.notificationBtn}>
-            <img src={notificationIcon} alt="notification" className={styles.notificationIcon} />
-          </button>
-          {/* ปุ่มแสดงชื่อผู้ใช้ */}
-          {userName && (
-            <button className={styles.userNameBtn}>
-              {userName}
-            </button>
-          )}
-          <button
-            className={styles.signin}
-            onClick={() => supabase.auth.signOut().then(() => navigate("/"))}
-          >
-            Sign out
-          </button>
-        </div>
-      </div>
+      <UserNavbar />
 
       {/* HERO */}
       <div className={styles.hero} style={{ backgroundImage: `url(${bg})` }}>
@@ -287,7 +246,7 @@ function Report() {
         </h1>
         <button
           className={styles.reportBtn}
-          onClick={() => navigate("/create-report")}
+          onClick={() => navigate("/report")}
         >
           Report
         </button>
@@ -304,21 +263,24 @@ function Report() {
                 type="checkbox"
                 checked={filters.pending}
                 onChange={() => toggleFilter("pending")}
-              /> รอซ่อม
+              />{" "}
+              รอซ่อม
             </label>
             <label>
               <input
                 type="checkbox"
                 checked={filters.in_progress}
                 onChange={() => toggleFilter("in_progress")}
-              /> กำลังดำเนินการ
+              />{" "}
+              กำลังดำเนินการ
             </label>
             <label>
               <input
                 type="checkbox"
                 checked={filters.completed}
                 onChange={() => toggleFilter("completed")}
-              /> เสร็จสิ้น
+              />{" "}
+              เสร็จสิ้น
             </label>
           </div>
 

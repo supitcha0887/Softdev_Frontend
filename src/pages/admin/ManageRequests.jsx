@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Pill } from "../components/UI.jsx";
-import { requests, STATUS, statusTone } from "../../data/mock.js";
+import { Pill } from "../../components/UI.jsx";
+import { requests, STATUS, statusTone } from "../../../data/mock.js";
 
 const TABS = [
   { key: "all", label: "ทั้งหมด / All", count: 127 },
