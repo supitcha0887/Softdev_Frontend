@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Card, Pill } from "../components/UI.jsx";
-import { requests, stats, statusToneList } from "../../data/mock.js";
+import { Card, Pill } from "../../components/UI.jsx";
+import { requests, stats, statusToneList } from "../../../data/mock.js";
 
 function StatIcon({ type }) {
   const common = {

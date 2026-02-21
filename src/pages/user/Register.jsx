@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../../supabaseClient";
 import styles from "./Register.module.css";
-import mailIcon from "./assets/Mail.png";
-import eyeIcon from "./assets/Eyes.png";
-import bgImage from "./assets/BG.jpg";
+import mailIcon from "../../assets/Mail.png";
+import eyeIcon from "../../assets/Eyes.png";
+import bgImage from "../../assets/BG.jpg";
 import { useNavigate } from "react-router-dom";
 
 function Register() {

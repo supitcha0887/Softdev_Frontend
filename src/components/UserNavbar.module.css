@@ -1,0 +1,152 @@
+.navbar {
+  height: 80px;
+  min-height: 95px;
+  max-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 15px 60px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid black;
+  padding: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logo:hover {
+  transform: scale(1.1);
+}
+
+.searchBox {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  padding: 15px 18px;
+  border-radius: 30px;
+  flex: 1;
+  max-width: 825px;
+  border: black 2px solid;
+  overflow: hidden;
+}
+
+.searchBox input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+}
+
+.searchBox img {
+  width: 50px;
+  height: 30px;
+  cursor: pointer;
+  object-fit: cover;
+  margin-left: 5px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.navLinks span {
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.navLinks span:hover {
+  color: #d60000;
+}
+
+.signin,
+.signup,
+.userNameBtn {
+  margin-top: 15px;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signin {
+  background: transparent;
+  border: 2px solid black;
+  color: black;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.signup {
+  background: #ff1a1a;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.signin:hover {
+  background: rgb(255, 0, 0);
+  color: white;
+}
+
+.signup:hover {
+  background: rgb(209, 0, 0);
+}
+
+/* ปุ่ม Notification — วงกลม */
+.notificationBtn {
+  margin-top: 15px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid black;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s ease;
+  flex-shrink: 0;
+}
+
+.notificationIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: 0.3s ease;
+}
+
+.userNameBtn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: #ff1a1a;
+  color: white;
+  border: none;
+  cursor: default;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(255, 26, 26, 0.3);
+}

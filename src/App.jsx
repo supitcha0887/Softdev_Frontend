@@ -1,12 +1,13 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import ManageRequests from "./pages/ManageRequests.jsx";
-import RequestDetail from "./pages/RequestDetail.jsx";
-import Login from "./Login.jsx";
-import Register from "./Register.jsx";
-import Report from "./Report.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import ManageRequests from "./pages/admin/ManageRequests.jsx";
+import RequestDetail from "./pages/admin/RequestDetail.jsx";
+import Login from "./pages/user/Login.jsx";
+import Register from "./pages/user/Register.jsx";
+import ReportPage from "./pages/user/ReportPage.jsx";
+import Report from "./pages/user/Report.jsx";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/home" element={<Report />} />
+      <Route path="/report" element={<ReportPage />} />
 
       {/* --- Admin Routes (หน้าที่มี Sidebar/Layout) --- */}
       <Route element={<Layout />}>

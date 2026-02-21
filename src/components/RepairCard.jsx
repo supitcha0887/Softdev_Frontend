@@ -1,5 +1,5 @@
 import styles from "./RepairCard.module.css";
-import noImg from "./assets/No_img.jpg";
+import noImg from "../assets/No_img.jpg";
 
 const statusMap = {
   pending:     { label: "รอซ่อม",           style: "pending" },
