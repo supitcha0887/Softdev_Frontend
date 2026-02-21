@@ -163,7 +163,7 @@ function Report() {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/Report/All", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Report/All`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -205,7 +205,7 @@ function Report() {
     try {
       const token = await getAccessToken();
       const response = await fetch(
-        `http://localhost:5000/api/Report/${item.id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/Report/${item.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
