@@ -16,6 +16,8 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -87,29 +89,39 @@ function Register() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <img src={mailIcon} alt="mail" />
+            <img src={mailIcon} alt="mail" style={{ cursor: "default" }} />
           </div>
 
           <div className={styles.inputBox}>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Create a password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <img src={eyeIcon} alt="eye" />
+            <img
+              src={eyeIcon}
+              alt="eye"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ opacity: showPassword ? 0.4 : 1, cursor: "pointer" }}
+            />
           </div>
 
           <div className={styles.inputBox}>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <img src={eyeIcon} alt="eye" />
+            <img
+              src={eyeIcon}
+              alt="eye"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{ opacity: showConfirmPassword ? 0.4 : 1, cursor: "pointer" }}
+            />
           </div>
 
           <button type="submit" className={styles.button} disabled={loading}>

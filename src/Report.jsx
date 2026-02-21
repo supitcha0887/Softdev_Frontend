@@ -7,6 +7,7 @@ import engineerIcon from "./assets/Engineer.png";
 import maintainIcon from "./assets/Maintain.png";
 import locationIcon from "./assets/Location.png";
 import closeIcon from "./assets/Close.png";
+import notificationIcon from "./assets/Notification.png";
 import RepairCard from "./RepairCard";
 import { useNavigate } from "react-router-dom";
 import { supabase, getAccessToken } from "./supabaseClient";
@@ -133,6 +134,23 @@ function Report() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [repairItems, setRepairItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [filters, setFilters] = useState({
+    pending: false,
+    in_progress: false,
+    completed: false,
+  });
+
+  // กรอง items ตาม checkbox ที่เลือก — ถ้าไม่ได้เลือกเลยให้แสดงทั้งหมด
+  const activeFilters = Object.keys(filters).filter((k) => filters[k]);
+  const filteredItems =
+    activeFilters.length === 0
+      ? repairItems
+      : repairItems.filter((item) => activeFilters.includes(item.status));
+
+  const toggleFilter = (key) => {
+    setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // 1. ดึงรายการทั้งหมดเพื่อแสดงใน Grid
   const fetchRepairs = async () => {
@@ -159,7 +177,7 @@ function Report() {
           id: item.id,
           title: item.title,
           status: item.status,
-          image: item.image || "https://via.placeholder.com/150",
+          image: item.image || "https://t3.ftcdn.net/jpg/10/22/24/80/360_F_1022248039_7LDxHRi3Mlt9BK3wzLBUGZp9XAO1gt2s.jpg",
           date: new Date(item.date).toLocaleDateString("th-TH", {
             day: "numeric",
             month: "short",
@@ -211,6 +229,17 @@ function Report() {
 
   useEffect(() => {
     fetchRepairs();
+
+    // ดึงชื่อผู้ใช้จาก Supabase session
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // ดึงจาก user_metadata ที่ส่งตอน Register (full_name)
+        const name = user.user_metadata?.full_name || user.email || "User";
+        setUserName(name);
+      }
+    };
+    fetchUser();
   }, []);
 
   return (
@@ -230,6 +259,16 @@ function Report() {
         <div className={styles.navLinks}>
           <span onClick={() => navigate("/home")}>Home</span>
           <span onClick={fetchRepairs}>List</span>
+          {/* ปุ่ม Notification */}
+          <button className={styles.notificationBtn}>
+            <img src={notificationIcon} alt="notification" className={styles.notificationIcon} />
+          </button>
+          {/* ปุ่มแสดงชื่อผู้ใช้ */}
+          {userName && (
+            <button className={styles.userNameBtn}>
+              {userName}
+            </button>
+          )}
           <button
             className={styles.signin}
             onClick={() => supabase.auth.signOut().then(() => navigate("/"))}
@@ -261,13 +300,25 @@ function Report() {
             <h4>Sort by</h4>
             <p>สถานะ</p>
             <label>
-              <input type="checkbox" /> รอซ่อม
+              <input
+                type="checkbox"
+                checked={filters.pending}
+                onChange={() => toggleFilter("pending")}
+              /> รอซ่อม
             </label>
             <label>
-              <input type="checkbox" /> กำลังดำเนินการ
+              <input
+                type="checkbox"
+                checked={filters.in_progress}
+                onChange={() => toggleFilter("in_progress")}
+              /> กำลังดำเนินการ
             </label>
             <label>
-              <input type="checkbox" /> เสร็จสิ้น
+              <input
+                type="checkbox"
+                checked={filters.completed}
+                onChange={() => toggleFilter("completed")}
+              /> เสร็จสิ้น
             </label>
           </div>
 
@@ -277,20 +328,26 @@ function Report() {
               <div className={styles.loader}>กำลังโหลดข้อมูล...</div>
             ) : (
               <div className={styles.grid}>
-                {repairItems.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleOpenDetail(item)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <RepairCard
-                      image={item.image}
-                      title={item.title}
-                      status={item.status}
-                      date={item.date}
-                    />
-                  </div>
-                ))}
+                {filteredItems.length === 0 ? (
+                  <p style={{ color: "#888", marginTop: "20px" }}>
+                    ไม่พบรายการที่ตรงกับตัวกรองที่เลือก
+                  </p>
+                ) : (
+                  filteredItems.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleOpenDetail(item)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <RepairCard
+                        image={item.image}
+                        title={item.title}
+                        status={item.status}
+                        date={item.date}
+                      />
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>

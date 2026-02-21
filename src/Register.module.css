@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   padding: 0 15px;
-  background: white; /* เผื่อกรณีพื้นหลังโปร่งแสง */
+  background: transparent;
 }
 
 /* 3. แก้ไข .button */
