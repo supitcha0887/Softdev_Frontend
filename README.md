@@ -73,8 +73,8 @@ VITE_API_BASE_URL=http://localhost:5070/api
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone <your-repo-url>
-cd ecc-repair-frontend
+git clone https://github.com/Pathornnnnn/Softdev_Frontend.git
+cd Softdev_Frontend
 ```
 
 ### 2️⃣ ติดตั้ง Dependencies
