@@ -45,6 +45,7 @@ public/
 assets/
 .env
 .env.example
+```
 
 ---
 
@@ -64,7 +65,7 @@ assets/
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 VITE_API_BASE_URL=http://localhost:5070/api
-
+```
 ---
 
 ## 🚀 การติดตั้งและใช้งาน
@@ -74,22 +75,32 @@ VITE_API_BASE_URL=http://localhost:5070/api
 ```bash
 git clone <your-repo-url>
 cd ecc-repair-frontend
+```
 
 ### 2️⃣ ติดตั้ง Dependencies
+```bash
 npm install
+```
 
 ### 3️⃣ สร้างไฟล์ .env
 
 คัดลอกจาก .env.example แล้วกรอกค่า
 
 ### 4️⃣ รันโหมดพัฒนา
+```bash
 npm run dev
+```
 
 ### 5️⃣ Build สำหรับ Production
+```bash
 npm run build
+```
 
 ### 6️⃣ Preview Production Build
+```bash
 npm run preview
+```
+
 ---
 
 ### 🔗 การใช้งาน Environment Variables
