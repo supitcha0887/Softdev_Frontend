@@ -9,10 +9,10 @@ import { supabase } from "./supabaseClient";
 function LoginPage() {
   const navigate = useNavigate();
 
-  // ✅ state สำหรับจัดการ Input
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // ✅ ฟังก์ชัน Login หลัก
   const handleLogin = async () => {
@@ -89,17 +89,23 @@ function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <img src={mailIcon} className="icon" alt="mail" />
+          <img src={mailIcon} className="icon" alt="mail" style={{ cursor: "default" }} />
         </div>
 
         <div className="input-box">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <img src={eyeIcon} className="icon" alt="eye" />
+          <img
+            src={eyeIcon}
+            className="icon"
+            alt="eye"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{ opacity: showPassword ? 0.4 : 1, cursor: "pointer" }}
+          />
         </div>
 
         <button className="forgot">Forgot your password?</button>
