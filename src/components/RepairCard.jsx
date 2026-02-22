@@ -5,6 +5,7 @@ const statusMap = {
   pending:     { label: "รอซ่อม",           style: "pending" },
   in_progress: { label: "กำลังดำเนินการ",   style: "in_progress" },
   completed:   { label: "เสร็จสิ้น",         style: "completed" },
+  cancelled:   { label: "ยกเลิก",           style: "cancelled" },
 };
 
 function RepairCard({ image, title, status, date }) {

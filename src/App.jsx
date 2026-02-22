@@ -8,6 +8,7 @@ import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
 import ReportPage from "./pages/user/ReportPage.jsx";
 import Report from "./pages/user/Report.jsx";
+import MyReports from "./pages/user/MyReports.jsx";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/home" element={<Report />} />
       <Route path="/report" element={<ReportPage />} />
+      <Route path="/my-reports" element={<MyReports />} />
 
       {/* --- Admin Routes (หน้าที่มี Sidebar/Layout) --- */}
       <Route element={<Layout />}>

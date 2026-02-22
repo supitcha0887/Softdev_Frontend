@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import "./Login.css";
 import bg from "../../assets/BG.jpg";
 import mailIcon from "../../assets/Mail.png";
@@ -37,28 +38,21 @@ function LoginPage() {
       console.log("====================================================");
       localStorage.setItem("token", token); // เก็บ Token ไว้ใช้ในหน้าอื่นๆ
 
-      // 2. ตรวจสอบการเชื่อมต่อกับ Backend (ASP.NET)
-      // เปลี่ยนจาก GET เป็น POST และส่ง JSON Body ให้ตรงกับ LoginRequest ใน C#
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Auth/verify-token`, {
-        method: "POST",
+      // 2. ตรวจสอบ Role ของผู้ใช้จาก Backend (ASP.NET)
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Auth/me`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ส่ง Token เผื่อหลังบ้านต้องการตรวจสอบซ้ำ
+          Authorization: `Bearer ${token}`, // ส่ง Token เพื่อตรวจสอบสิทธิ์
         },
-        body: JSON.stringify({
-          token: token, // ชื่อ Property 'token' ต้องตรงกับใน C# (LoginRequest class)
-        }),
       });
 
       if (res.ok) {
         const result = await res.json();
-        if (result.success) {
-          navigate("/home"); // ✅ เปลี่ยนไปหน้า Report เมื่อสำเร็จ
+        if (result.isAdmin) {
+          navigate("/dashboard"); // ไปหน้า Admin Dashboard ถ้าเป็น Admin
         } else {
-          alert("Backend ยืนยัน Token ไม่สำเร็จ: " + result.message);
+          navigate("/home"); // ไปหน้า Home ถ้าเป็น User ทั่วไป
         }
       } else {
-        // กรณี Error 405 หรือ 500
         alert(`การยืนยันตัวตนล้มเหลว (Status: ${res.status})`);
       }
     } catch (error) {
