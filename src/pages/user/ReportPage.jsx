@@ -40,6 +40,12 @@ function ReportPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
+        e.target.value = null;
+        return;
+      }
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -180,7 +186,7 @@ function ReportPage() {
       <form onSubmit={handleSubmit} className={styles.formContainer}>
         <div className={styles.formCard}>
           <div className={styles.uploadBox} onClick={() => fileInputRef.current.click()}>
-            <input type="file" id="fileUpload" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
+            <input type="file" id="fileUpload" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} accept="image/jpeg,image/png,image/gif,image/webp" />
             {imagePreview ? <img src={imagePreview} alt="Preview" className={styles.imagePreview} /> : 'อัพโหลดรูปภาพ'}
           </div>
           {errors.image && <p className={styles.error}>{errors.image}</p>}
