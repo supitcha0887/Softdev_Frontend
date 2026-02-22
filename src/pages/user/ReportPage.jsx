@@ -10,11 +10,13 @@ function ReportPage() {
   const [imageFile, setImageFile] = useState(null);
   const [assets, setAssets] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [assetCategories, setAssetCategories] = useState([]);
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     asset_id: '',
     location_id: '',
+    category_id: '',
     description: '',
   });
   const [errors, setErrors] = useState({});
@@ -29,9 +31,14 @@ function ReportPage() {
       setUser(user);
 
       // Fetch locations
-      const { data: locationsData, error: locationsError } = await supabase.from('locations').select('*');
+      const { data: locationsData, error: locationsError } = await supabase.from('locations').select('location_id, building, floor, room');
       if (locationsError) console.error('Error fetching locations:', locationsError);
       else setLocations(locationsData);
+
+      // Fetch asset categories
+      const { data: categoriesData, error: categoriesError } = await supabase.from('asset_categories').select('category_id, type_name');
+      if (categoriesError) console.error('Error fetching asset categories:', categoriesError);
+      else setAssetCategories(categoriesData);
     };
 
     fetchInitialData();
@@ -55,26 +62,39 @@ function ReportPage() {
     }
   };
 
-  const handleLocationChange = async (e) => {
+  const handleLocationChange = (e) => {
     const selectedLocationId = e.target.value;
     setFormData(prev => ({
       ...prev,
       location_id: selectedLocationId,
-      asset_id: '', // Reset asset when location changes
+      category_id: '', // Reset category
+      asset_id: '',      // Reset asset
+    }));
+    setAssets([]); // Clear previous assets
+  };
+  
+  const handleCategoryChange = async (e) => {
+    const selectedCategoryId = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      category_id: selectedCategoryId,
+      asset_id: '', // Reset asset when category changes
     }));
     setAssets([]); // Clear previous assets
 
-    if (selectedLocationId) {
+    if (formData.location_id && selectedCategoryId) {
       const { data: assetsData, error: assetsError } = await supabase
         .from('assets')
         .select('asset_id, asset_name, asset_number')
-        .eq('location_id', selectedLocationId);
-
+        .eq('location_id', formData.location_id)
+        .eq('category_id', selectedCategoryId)
+        .eq('status', 'active');
+      
       if (assetsError) console.error('Error fetching assets:', assetsError);
       else setAssets(assetsData);
     }
   };
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -84,6 +104,7 @@ function ReportPage() {
     const newErrors = {};
     if (!formData.title) newErrors.title = 'กรุณากรอกหัวข้อ';
     if (!formData.location_id) newErrors.location_id = 'กรุณาเลือกสถานที่';
+    if (!formData.category_id) newErrors.category_id = 'กรุณาเลือกประเภทอุปกรณ์';
     if (!formData.asset_id) newErrors.asset_id = 'กรุณาเลือกครุภัณฑ์';
     if (!formData.description) newErrors.description = 'กรุณากรอกรายละเอียด';
     if (!imageFile) newErrors.image = 'กรุณาอัพโหลดรูปภาพ';
@@ -159,7 +180,7 @@ function ReportPage() {
         try {
           const errorData = JSON.parse(text);
           setErrors({ api: `Failed to submit report: ${errorData.message || 'Unknown error'}` });
-        } catch (e) {
+        } catch {
           setErrors({ api: `Failed to submit report: Server returned a non-JSON error.` });
         }
       }
@@ -199,7 +220,7 @@ function ReportPage() {
 
           <div className={styles.inputGroup}>
             <select name="location_id" value={formData.location_id} onChange={handleLocationChange}>
-              <option value="">สถานที่ ห้อง ณ ตึก ECC</option>
+              <option value="">เลือกห้อง/สถานที่</option>
               {locations.map(loc => (
                 <option key={loc.location_id} value={loc.location_id}>
                   {loc.building} {loc.floor} {loc.room}
@@ -211,8 +232,21 @@ function ReportPage() {
           {errors.location_id && <p className={styles.error}>{errors.location_id}</p>}
 
           <div className={styles.inputGroup}>
-            <select name="asset_id" value={formData.asset_id} onChange={handleChange} disabled={!formData.location_id}>
-              <option value="">{!formData.location_id ? "กรุณาเลือกสถานที่ก่อน" : "ค้นหาครุภัณฑ์"}</option>
+            <select name="category_id" value={formData.category_id} onChange={handleCategoryChange} disabled={!formData.location_id}>
+              <option value="">{!formData.location_id ? "กรุณาเลือกสถานที่ก่อน" : "เลือกประเภทอุปกรณ์"}</option>
+              {assetCategories.map(cat => (
+                <option key={cat.category_id} value={cat.category_id}>
+                  {cat.type_name}
+                </option>
+              ))}
+            </select>
+            <span className={styles.required}>*</span>
+          </div>
+          {errors.category_id && <p className={styles.error}>{errors.category_id}</p>}
+
+          <div className={styles.inputGroup}>
+            <select name="asset_id" value={formData.asset_id} onChange={handleChange} disabled={!formData.location_id || !formData.category_id}>
+              <option value="">{!formData.category_id ? "กรุณาเลือกประเภทก่อน" : "เลือกอุปกรณ์"}</option>
               {assets.map(asset => (
                 <option key={asset.asset_id} value={asset.asset_id}>
                   {asset.asset_name} ({asset.asset_number})
