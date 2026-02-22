@@ -7,74 +7,76 @@
 - [`Softdev_Frontend/src/pages/user/MyReports.module.css`](Softdev_Frontend/src/pages/user/MyReports.module.css)
 - [`Softdev_Frontend/src/components/NotificationPopup.jsx`](Softdev_Frontend/src/components/NotificationPopup.jsx)
 - [`Softdev_Frontend/src/components/NotificationPopup.module.css`](Softdev_Frontend/src/components/NotificationPopup.module.css)
+- [`Softdev_Frontend/data/mock.js`](Softdev_Frontend/data/mock.js) (มีการเพิ่มและแก้ไขโครงสร้างข้อมูลจำลองทั้งหมด)
+- [`Softdev_Frontend/vite.config.js`](Softdev_Frontend/vite.config.js) (สำหรับ proxy config)
 
 ### แก้ไข
 - [`Softdev_Frontend/src/App.jsx`](Softdev_Frontend/src/App.jsx): เพิ่ม route สำหรับหน้า MyReports
 - [`Softdev_Frontend/src/components/RepairCard.jsx`](Softdev_Frontend/src/components/RepairCard.jsx): เพิ่มสถานะ `cancelled` และอัปเดต `statusMap`
 - [`Softdev_Frontend/src/components/RepairCard.module.css`](Softdev_Frontend/src/components/RepairCard.module.css): เพิ่ม style สำหรับสถานะ `cancelled`
-- [`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx): อัปเดตลิงก์ 'List' ให้ชี้ไปที่ `/my-reports`, เพิ่ม logic สำหรับแสดง NotificationPopup, จัดการ state `showNotifications` และ `currentUserId`.
-- [`Softdev_Frontend/src/pages/user/MyReports.module.css`](Softdev_Frontend/src/pages/user/MyReports.module.css): ปรับขนาด font size สำหรับหัวข้อส่วน (section titles) เป็น `24px`.
-- `.env.example` และ `package-lock.json`: จัดการไฟล์ build ที่เกี่ยวข้อง (ลบ `.env.example`, แก้ไข `package-lock.json`).
+- [`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx):
+    - อัปเดตลิงก์ 'List' ให้ชี้ไปที่ `/my-reports`
+    - เพิ่ม logic สำหรับแสดง NotificationPopup
+    - จัดการ state `showNotifications` และ `unreadCount`
+    - ดึง `full_name` จาก Supabase `users` table
+    - ลบ `currentUserId`
+- [`Softdev_Frontend/src/components/UserNavbar.module.css`](Softdev_Frontend/src/components/UserNavbar.module.css): เพิ่ม style สำหรับ `notificationBadge` (unread count)
+- [`Softdev_Frontend/src/pages/user/MyReports.module.css`](Softdev_Frontend/src/pages/user/MyReports.module.css): ปรับขนาด font size สำหรับหัวข้อส่วน (section titles) เป็น `24px`
+- [`Softdev_Frontend/src/pages/user/Login.jsx`](Softdev_Frontend/src/pages/user/Login.jsx):
+    - แก้ logic การ login ให้รองรับ Backend Auth (GET /Auth/me)
+    - ดึง `access_token` จาก session และเก็บใน `localStorage` key "token"
+    - นำทางตาม `response.isAdmin` (`/dashboard` หรือ `/home`)
+    - เปลี่ยนจาก `axios` มาใช้ `fetch`
+    - ลบ `/api/` นำหน้า endpoint
+- [`Softdev_Frontend/src/pages/admin/AdminDashboard.jsx`](Softdev_Frontend/src/pages/admin/AdminDashboard.jsx): เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
+- [`Softdev_Frontend/src/pages/admin/ManageRequests.jsx`](Softdev_Frontend/src/pages/admin/ManageRequests.jsx): เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
+- [`Softdev_Frontend/src/pages/admin/RequestDetail.jsx`](Softdev_Frontend/src/pages/admin/RequestDetail.jsx): เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
+- `.env.example` และ `package-lock.json`: จัดการไฟล์ build ที่เกี่ยวข้อง (ลบ `.env.example`, แก้ไข `package-lock.json`)
 
-## โครงสร้าง Component ที่มีอยู่และใช้งาน
-
-### `UserNavbar` ([`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx))
-- **หน้าที่:** แถบนำทางสำหรับผู้ใช้งาน (นักศึกษา), แสดงโลโก้, ช่องค้นหา, ลิงก์ 'Home' และ 'List', ปุ่มแจ้งเตือน (bell icon) และข้อมูลผู้ใช้/ปุ่ม Sign out.
-- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `ReportPage.jsx`.
-- **การปรับปรุง:** เพิ่ม logic การแสดง NotificationPopup และการจัดการ `userId`.
-
-### `Footer` ([`Softdev_Frontend/src/components/Footer.jsx`](Softdev_Frontend/src/components/Footer.jsx))
-- **หน้าที่:** ส่วนท้ายของหน้าเว็บ แสดงข้อมูลลิขสิทธิ์.
-- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `ReportPage.jsx`.
-
-### `RepairCard` ([`Softdev_Frontend/src/components/RepairCard.jsx`](Softdev_Frontend/src/components/RepairCard.jsx))
-- **หน้าที่:** แสดงข้อมูลสรุปของรายการแจ้งซ่อมแต่ละรายการ เช่น รูปภาพ, หัวข้อ, สถานะ, และวันที่แจ้งซ่อม.
-- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `Report.jsx`.
-- **การปรับปรุง:** เพิ่มการรองรับสถานะ `cancelled` พร้อม styling ที่เหมาะสม.
-
-### `NotificationPopup` ([`Softdev_Frontend/src/components/NotificationPopup.jsx`](Softdev_Frontend/src/components/NotificationPopup.jsx))
-- **หน้าที่:** แสดงรายการแจ้งเตือนแบบ popup เมื่อผู้ใช้คลิกที่ bell icon ใน `UserNavbar`.
-- **การใช้งาน:** ถูก render แบบมีเงื่อนไขใน `UserNavbar.jsx`.
-- **การพัฒนา:** ดึงข้อมูลการแจ้งเตือนจาก Supabase, แสดงสถานะแบบ color-coded, วันที่/เวลา, รายละเอียด, และชื่อช่าง (ถ้ามี).
+## API Endpoints ที่ใช้
+- `GET /Auth/me`: สำหรับตรวจสอบ Role ของผู้ใช้หลัง Login
+- `GET /Notification/MyNotifications`: สำหรับดึงรายการแจ้งเตือนของผู้ใช้
+- `GET /Notification/UnreadCount`: สำหรับดึงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน
+- `PUT /Notification/MarkAllAsRead`: สำหรับทำเครื่องหมายแจ้งเตือนทั้งหมดว่าอ่านแล้ว
+- **ข้อควรทราบ:** ทุก API request ใช้ `fetch` และส่ง `Header: Authorization: Bearer <token>` จาก `localStorage.getItem("token")`
 
 ## Supabase Query Patterns ที่ใช้
+- `supabase.auth.getUser()`: สำหรับดึงข้อมูล session ของผู้ใช้
+- `supabase.from('users').select('full_name').eq('user_id', user.id).single()`: สำหรับดึง `full_name` ของ user จาก table `users`
+- **ข้อควรทราบ:** สำหรับ `reports` ที่มี Foreign Key ไปยัง `users` สองตัว (reporter_id, technician_id) ต้องระบุ `users!reporter_id(full_name)` หรือ `users!technician_id(full_name)` เพื่อหลีกเลี่ยง ambiguous relationship ในอนาคต (ใน `data/mock.js` ใช้การ `enrichReports` เพื่อจำลองการ join)
 
-มีการใช้ Supabase client (`supabaseClient.js`) สำหรับการดึงข้อมูลจาก backend:
+## โครงสร้าง Component ที่มีอยู่และใช้งาน
+### `UserNavbar` ([`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx))
+- **หน้าที่:** แถบนำทางสำหรับผู้ใช้งาน (นักศึกษา), แสดงโลโก้, ช่องค้นหา, ลิงก์ 'Home' และ 'List', ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
+- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `ReportPage.jsx`
+- **การปรับปรุง:** เพิ่ม logic การแสดง NotificationPopup และการจัดการ `unreadCount`, ดึง `full_name` จาก Supabase, ลบ `currentUserId`
 
-1.  **การดึงข้อมูล Reports (ใน `MyReports.jsx`):**
-    *   ดึงข้อมูลจาก table `reports` พร้อม join `locations` และ `assets`.
-    *   มีการ filter ตาม `reporter_id` ของ user ที่ login อยู่ และตาม `status` (pending, in_progress, completed, cancelled).
-    *   เรียงลำดับตาม `created_at` (DESC หรือ ASC).
-    ```javascript
-    supabase
-      .from("reports")
-      .select(`
-        *,
-        locations (location_name, building, floor, room),
-        assets (asset_name, asset_number)
-      `)
-      .eq("user_id", userId) // ใช้ reporter_id สำหรับ MyReports.jsx
-      .order("created_at", { ascending: sortBy === "date_asc" });
-    ```
+### `Footer` ([`Softdev_Frontend/src/components/Footer.jsx`](Softdev_Frontend/src/components/Footer.jsx))
+- **หน้าที่:** ส่วนท้ายของหน้าเว็บ แสดงข้อมูลลิขสิทธิ์
+- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `ReportPage.jsx`
 
-2.  **การดึงข้อมูล Notifications (ใน `NotificationPopup.jsx`):**
-    *   ดึงข้อมูลจาก table `notifications` โดย filter ตาม `user_id` ของ user ที่ login อยู่.
-    *   มีการ join กับ table `reports` (ผ่าน `related_report_id`) และ `users` (ผ่าน `technician_id` ใน `reports`) เพื่อดึงชื่อช่างที่เกี่ยวข้อง.
-    *   **การแก้ไขสำคัญ:** แก้ไขปัญหา ambiguous relationship โดยระบุ foreign key ชัดเจนสำหรับ `users` join เป็น `technician_info:users!technician_id(full_name)`.
-    ```javascript
-    supabase
-      .from("notifications")
-      .select(`
-        *,
-        related_report_id,
-        reports (technician_id, technician_info:users!technician_id(full_name))
-      `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    ```
+### `RepairCard` ([`Softdev_Frontend/src/components/RepairCard.jsx`](Softdev_Frontend/src/components/RepairCard.jsx))
+- **หน้าที่:** แสดงข้อมูลสรุปของรายการแจ้งซ่อมแต่ละรายการ เช่น รูปภาพ, หัวข้อ, สถานะ, และวันที่แจ้งซ่อม
+- **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `Report.jsx`
+- **การปรับปรุง:** เพิ่มการรองรับสถานะ `cancelled` พร้อม styling ที่เหมาะสม
 
-3.  **การดึงข้อมูล User Session และ User ID (ใน `UserNavbar.jsx` และ `MyReports.jsx`):**
-    *   ใช้ `supabase.auth.getUser()` เพื่อดึงข้อมูล user ที่ login อยู่, รวมถึง `user.id` และ `user.user_metadata?.full_name`.
+### `NotificationPopup` ([`Softdev_Frontend/src/components/NotificationPopup.jsx`](Softdev_Frontend/src/components/NotificationPopup.jsx))
+- **หน้าที่:** แสดงรายการแจ้งเตือนแบบ popup เมื่อผู้ใช้คลิกที่ bell icon ใน `UserNavbar`
+- **การใช้งาน:** ถูก render แบบมีเงื่อนไขใน `UserNavbar.jsx`
+- **การพัฒนา:** ดึงข้อมูลการแจ้งเตือนจาก Backend API (`/Notification/MyNotifications`), แสดงสถานะแบบ color-coded, วันที่/เวลา, รายละเอียด (จาก `desc`), และชื่อช่าง (ถ้ามี), มีการทำเครื่องหมายว่าอ่านแล้ว (`/Notification/MarkAllAsRead`)
+
+## สิ่งที่ยังไม่ได้ทำ (TODO)
+- Backend Admin API ยังไม่มี (ปัจจุบันใช้ mock data อยู่)
+- ทดสอบ Login จริงกับ Backend (รอเพื่อนร่วมทีม)
+- หน้า Admin จัดการ User (ยังไม่มีการพัฒนา)
+- หน้า Admin ข้อมูลครุภัณฑ์ (ยังไม่มีการพัฒนา)
+- การสร้างหน้า Admin ใหม่ๆ จะต้องมีการเชื่อมต่อกับ Backend API จริง (ปัจจุบันใช้ mock data)
+
+## ข้อควรระวัง
+- ห้ามยุ่งเกี่ยวกับโฟลเดอร์ `PSDP_Project` (เป็นส่วนของ Backend)
+- ใน `reports` model มี Foreign Key สองตัวที่อ้างอิงถึง `users` (`reporter_id`, `technician_id`) ซึ่งอาจต้องมีการ `join` แบบ explicit ใน query ของ Supabase หรือ Backend เพื่อหลีกเลี่ยงความกำกวม
+- API endpoint ไม่มี `/api/` นำหน้า แต่ใช้ผ่าน `vite` proxy
+- `data/mock.js` มีการใช้ `enrichReports` function เพื่อเตรียมข้อมูลให้หน้า Admin แสดงผลได้ถูกต้องตามโครงสร้างที่คาดหวัง
 
 ## Branch ที่ทำงาน
 - `Naphat`
