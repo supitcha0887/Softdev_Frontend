@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
-import { requests, stats, statusToneList } from "../../../data/mock.js";
+import { reports, stats, statusToneList } from "../../../data/mock.js";
 
 function StatIcon({ type }) {
   const common = {
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="list">
-              {requests.slice(0, 3).map((r) => (
+              {reports.slice(0, 3).map((r) => (
                 <div key={r.id} className="list-item">
                   <img className="thumb" src={r.img} alt={r.titleEN} />
                   <div className="li-body">

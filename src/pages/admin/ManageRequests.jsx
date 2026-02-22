@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Pill } from "../../components/UI.jsx";
-import { requests, STATUS, statusTone } from "../../../data/mock.js";
+import { reports, STATUS, statusTone } from "../../../data/mock.js";
 
 const TABS = [
   { key: "all", label: "ทั้งหมด / All", count: 127 },
@@ -20,7 +20,7 @@ export default function ManageRequests() {
   const pageSize = 8;
 
   const filtered = useMemo(() => {
-    let items = [...requests];
+        let items = [...reports];
 
     if (activeTab === "new") items = items.filter((i) => i.status === STATUS.NEW);
     if (activeTab === "progress") items = items.filter((i) => i.status === STATUS.PROGRESS);
