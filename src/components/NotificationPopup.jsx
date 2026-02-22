@@ -1,48 +1,56 @@
 import React, { useState, useEffect } from "react";
 import styles from "./NotificationPopup.module.css";
-import { supabase } from "../supabaseClient";
 
-function NotificationPopup({ userId, onClose }) {
+
+function NotificationPopup({ onClose, setUnreadCount }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const token = localStorage.getItem("token");
+
+    const fetchAndMarkNotifications = async () => {
+      if (!token) {
+        setError("No authentication token found.");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
-        const { data: notificationsData, error: fetchError } = await supabase
-          .from("notifications")
-          .select(`
-            *,
-            related_report_id,
-            reports (technician_id, technician_info:users!technician_id(full_name))
-          `)
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false });
-
-        if (fetchError) throw fetchError;
-
+        // Fetch notifications
+        const notificationsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Notification/MyNotifications`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!notificationsResponse.ok) throw new Error(`HTTP error! status: ${notificationsResponse.status}`);
+        const notificationsData = await notificationsResponse.json();
         setNotifications(notificationsData);
+
+        // Mark all as read
+        const markAsReadResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Notification/MarkAllAsRead`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!markAsReadResponse.ok) throw new Error(`HTTP error! status: ${markAsReadResponse.status}`);
+        setUnreadCount(0); // Update unread count in UserNavbar
+
       } catch (err) {
-        console.error("Error fetching notifications:", err);
-        setError(err.message);
+        console.error("Error fetching or marking notifications:", err);
+        setError(err.message || "Failed to fetch or mark notifications.");
       } finally {
         setLoading(false);
       }
     };
 
-    if (userId) {
-      fetchNotifications();
-    }
-  }, [userId]);
+    fetchAndMarkNotifications();
+  }, []);
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
-    const optionsDate = { year: "numeric", month: "short", day: "numeric" };
-    const optionsTime = { hour: "2-digit", minute: "2-digit", hour12: false };
-    return ` ${date.toLocaleDateString("en-GB", optionsDate)} at ${date.toLocaleTimeString("en-GB", optionsTime)}`;
+    const formatted = date.toLocaleString("th-TH");
+    return formatted;
   };
 
   const getStatusBadgeClass = (type) => {
@@ -89,10 +97,10 @@ function NotificationPopup({ userId, onClose }) {
                   <span className={`${styles.statusBadge} ${getStatusBadgeClass(notification.type)}`}>
                     {getStatusBadgeLabel(notification.type)}
                   </span>
-                  <span className={styles.dateTime}>{formatDateTime(notification.created_at)}</span>
+                  <span className={styles.dateTime}>{formatDateTime(notification.create_at)}</span>
                 </div>
                 <p className={styles.itemTitle}>{notification.title}</p>
-                <p className={styles.itemDescription}>{notification.description}</p>
+                <p className={styles.itemDescription}>{notification.desc}</p>
                 {notification.reports?.technician_id && notification.reports?.technician_info?.full_name && (
                   <p className={styles.technicianName}>นายช่าง: {notification.reports.technician_info.full_name}</p>
                 )}

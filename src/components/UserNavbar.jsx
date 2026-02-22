@@ -4,29 +4,65 @@ import icon from "../assets/Icon.png";
 import searchIcon from "../assets/Search.jpg";
 import notificationIcon from "../assets/Notification.png";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
+import { supabase } from "../supabaseClient"; // Keep for signOut
 import NotificationPopup from "./NotificationPopup";
+
 
 export default function UserNavbar() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    // ดึงชื่อผู้ใช้จาก Supabase session
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        // ดึงจาก user_metadata ที่ส่งตอน Register (full_name)
-        const name = user.user_metadata?.full_name || user.email || "User";
-        setUserName(name);
-        setCurrentUserId(user.id);
+    const token = localStorage.getItem("token");
+
+    const fetchUserData = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error("Error fetching Supabase user:", userError);
+        setUserName("");
+        setUnreadCount(0);
+        localStorage.removeItem("token"); // Clear token if user session is invalid
+        navigate("/");
+        return;
+      }
+
+      try {
+        // Fetch full_name from Supabase users table
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+        setUserName(profile.full_name || user.email || "User");
+
+        // Fetch unread notification count from backend
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No authentication token found for unread count.");
+          setUnreadCount(0);
+          return;
+        }
+
+        const unreadCountResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Notification/UnreadCount`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!unreadCountResponse.ok) throw new Error(`HTTP error! status: ${unreadCountResponse.status}`);
+        const unreadCountData = await unreadCountResponse.json();
+        setUnreadCount(unreadCountData.count);
+
+      } catch (error) {
+        console.error("Error fetching user profile or unread count:", error);
+        setUserName("");
+        setUnreadCount(0);
       }
     };
-    fetchUser();
+
+    fetchUserData();
   }, []);
 
   return (
@@ -55,6 +91,9 @@ export default function UserNavbar() {
               alt="notification"
               className={styles.notificationIcon}
             />
+            {unreadCount > 0 && (
+              <span className={styles.notificationBadge}>{unreadCount}</span>
+            )}
           </button>
           {/* ปุ่มแสดงชื่อผู้ใช้ */}
           {userName && (
@@ -62,7 +101,12 @@ export default function UserNavbar() {
           )}
           <button
             className={styles.signin}
-            onClick={() => supabase.auth.signOut().then(() => navigate("/"))}
+            onClick={() => {
+              supabase.auth.signOut().then(() => {
+                localStorage.removeItem("token"); // Clear token on sign out
+                navigate("/");
+              });
+            }}
           >
             Sign out
           </button>
@@ -70,8 +114,8 @@ export default function UserNavbar() {
       </div>
       {showNotifications && (
         <NotificationPopup
-          userId={currentUserId}
           onClose={() => setShowNotifications(false)}
+          setUnreadCount={setUnreadCount}
         />
       )}
     </>
