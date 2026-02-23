@@ -106,7 +106,6 @@ function ReportPage() {
     if (!formData.location_id) newErrors.location_id = 'กรุณาเลือกสถานที่';
     if (!formData.category_id) newErrors.category_id = 'กรุณาเลือกประเภทอุปกรณ์';
     if (!formData.asset_id) newErrors.asset_id = 'กรุณาเลือกครุภัณฑ์';
-    if (!formData.description) newErrors.description = 'กรุณากรอกรายละเอียด';
     if (!imageFile) newErrors.image = 'กรุณาอัพโหลดรูปภาพ';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -258,10 +257,8 @@ function ReportPage() {
           {errors.asset_id && <p className={styles.error}>{errors.asset_id}</p>}
           
           <div className={styles.inputGroup}>
-            <textarea name="description" placeholder="รายละเอียดเพิ่มเติม" rows="4" value={formData.description} onChange={handleChange}></textarea>
-            <span className={styles.required}>*</span>
+            <textarea name="description" placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)" rows="4" value={formData.description} onChange={handleChange}></textarea>
           </div>
-          {errors.description && <p className={styles.error}>{errors.description}</p>}
 
           <div className={styles.buttonContainer}>
             <button type="submit" className={styles.submitButton} disabled={loading}>

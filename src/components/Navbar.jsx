@@ -1,6 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { notifications as seedNotifications } from "../../data/mock.js";
 import svg from "../assets/svg.png";
 import user from "../assets/user.png";
 
@@ -15,14 +14,9 @@ function IconBell() {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ setNcOpen, notifs }) {
   const { pathname } = useLocation();
   const isList = pathname.startsWith("/requests");
-
-  const [ncOpen, setNcOpen] = useState(false);
-
-  // ✅ ทำให้แจ้งเตือนเป็น state เพื่ออัปเดต read ได้
-  const [notifs, setNotifs] = useState(seedNotifications);
 
   const unreadCount = useMemo(() => notifs.filter((n) => !n.read).length, [notifs]);
 
