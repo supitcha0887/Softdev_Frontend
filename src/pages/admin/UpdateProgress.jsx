@@ -202,6 +202,7 @@ export default function UpdateProgress() {
                             </div>
                             <div className={styles.buttonGroup}>
                                 <button type="submit" className={styles.saveButton}>บันทึกการอัปเดต</button>
+                                <button type="button" className={styles.costButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>บันทึกค่าใช้จ่าย</button>
                                 <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
                             </div>
                         </form>
