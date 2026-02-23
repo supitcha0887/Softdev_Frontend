@@ -152,8 +152,36 @@ body{
 
 .side-card{ padding:14px; }
 
+.dashboard-section-title {
+  font-weight: 900;
+  font-size: 18px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dashboard-chart-card {
-  margin-top: 14px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .side-title{ font-weight:900; font-size:13px; margin-bottom:10px; }

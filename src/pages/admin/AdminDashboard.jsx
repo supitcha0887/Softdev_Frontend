@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
-import { reports, stats, statusToneList } from "../../../data/mock.js";
+import { reports, stats, statusToneList, STATUS } from "../../../data/mock.js";
 import {
   BarChart,
   Bar,
@@ -11,97 +11,16 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  PieChart,
+  Pie,
+  Legend,
 } from "recharts";
 
-function StatIcon({ type }) {
-  const common = {
-    width: 18,
-    height: 18,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    "aria-hidden": true,
-  };
-
-  // NEW = bag
-  if (type === "NEW") {
-    return (
-      <svg {...common}>
-        <path
-          d="M7 7V6a5 5 0 0 1 10 0v1"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <path
-          d="M6 7h12l-1 14H7L6 7Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  // PENDING = clock
-  if (type === "PENDING") {
-    return (
-      <svg {...common}>
-        <path
-          d="M12 8v5l3 2"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-      </svg>
-    );
-  }
-
-  // PROGRESS = gear
-  if (type === "PROGRESS") {
-    return (
-      <svg {...common}>
-        <path
-          d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        <path
-          d="M19.4 13a7.9 7.9 0 0 0 .05-1 7.9 7.9 0 0 0-.05-1l2.05-1.6-2-3.46-2.5 1a7.6 7.6 0 0 0-1.73-1L15 2h-6l-.22 2.94c-.6.25-1.18.58-1.73 1l-2.5-1-2 3.46L4.6 11a7.9 7.9 0 0 0-.05 1c0 .34.02.67.05 1L2.55 14.6l2 3.46 2.5-1c.55.42 1.13.75 1.73 1L9 22h6l.22-2.94c.6-.25 1.18-.58 1.73-1l2.5 1 2-3.46L19.4 13Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  // DONE = check circle
-  return (
-    <svg {...common}>
-      <path
-        d="M9.5 12.5 11 14l3.5-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
+const MONTHS_TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
 export default function AdminDashboard() {
-  const chartData = useMemo(() => {
+  // Logic for Reports by Location
+  const locationData = useMemo(() => {
     const counts = {};
     reports.forEach((r) => {
       const loc = r.locationTH || "อื่นๆ";
@@ -110,7 +29,41 @@ export default function AdminDashboard() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, []);
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+  // Logic for Status Overview (Donut Chart)
+  const statusData = useMemo(() => {
+    const counts = {
+      [STATUS.PENDING]: { name: "รอรับงาน", value: 0, color: "#f59e0b" },
+      [STATUS.APPROVED]: { name: "อนุมัติ", value: 0, color: "#3b82f6" },
+      [STATUS.IN_PROGRESS]: { name: "กำลังซ่อม", value: 0, color: "#8b5cf6" },
+      [STATUS.COMPLETED]: { name: "เสร็จสิ้น", value: 0, color: "#10b981" },
+      [STATUS.CANCELLED]: { name: "ยกเลิก", value: 0, color: "#6b7280" },
+    };
+
+    reports.forEach((r) => {
+      if (counts[r.status]) {
+        counts[r.status].value += 1;
+      }
+    });
+
+    return Object.values(counts);
+  }, []);
+
+  // Logic for Monthly Reports (Bar Chart)
+  const monthlyData = useMemo(() => {
+    const counts = new Array(12).fill(0);
+    reports.forEach((r) => {
+      if (r.created_at) {
+        const month = new Date(r.created_at).getMonth();
+        counts[month] += 1;
+      }
+    });
+    return counts.map((value, index) => ({
+      name: MONTHS_TH[index],
+      value,
+    }));
+  }, []);
+
+  const THEME_COLOR = "#c0392b";
 
   return (
     <>
@@ -169,29 +122,79 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        <Card className="dashboard-chart-card">
-          <div className="dash-head">
-            <div className="dash-title">สถิติการแจ้งซ่อมแบ่งตามสถานที่ / Reports by Location</div>
-          </div>
-          <div style={{ width: "100%", height: 300, marginTop: 20 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+        <div className="dashboard-section-title">ภาพรวมสถิติ / Statistics</div>
+        
+        <div className="dashboard-charts-grid">
+          {/* Chart 1: Reports by Location */}
+          <Card className="dashboard-chart-card">
+            <div className="dash-head">
+              <div className="dash-title">รายงานแบ่งตามสถานที่ / By Location</div>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={locationData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                  />
+                  <Bar dataKey="value" fill={THEME_COLOR} radius={[4, 4, 0, 0]} barSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* Chart 2: Status Overview (Donut) */}
+          <Card className="dashboard-chart-card">
+            <div className="dash-head">
+              <div className="dash-title">สัดส่วนสถานะงาน / Status Overview</div>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* Chart 3: Monthly Reports */}
+          <Card className="dashboard-chart-card">
+            <div className="dash-head">
+              <div className="dash-title">จำนวนแจ้งซ่อมรายเดือน / Monthly</div>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                  />
+                  <Bar dataKey="value" fill={THEME_COLOR} radius={[4, 4, 0, 0]} barSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
 
         <div className="dash-grid">
           <Card className="dash-main">
@@ -221,7 +224,6 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="li-right">
-                    {/* ✅ PENDING ใน “รายการซ่อมใหม่” จะเป็นกล่องสีเทา */}
                     <Pill tone={statusToneList(r.status)}>{r.status}</Pill>
                     <Link className="btn-danger-sm" to={`/requests/${r.id}`}>
                       เปิด / Open
