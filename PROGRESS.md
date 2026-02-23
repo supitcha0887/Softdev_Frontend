@@ -30,7 +30,7 @@
  - [`Softdev_Frontend/src/components/RepairCard.jsx`](Softdev_Frontend/src/components/RepairCard.jsx): เพิ่มสถานะ `cancelled` และอัปเดต `statusMap`
  - [`Softdev_Frontend/src/components/RepairCard.module.css`](Softdev_Frontend/src/components/RepairCard.module.css): เพิ่ม style สำหรับสถานะ `cancelled`
  - [`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx):
-     - อัปเดตลิงก์ 'List' ให้ชี้ไปที่ `/my-reports`
+     - อัปเดตลิงก์ \'List\' ให้ชี้ไปที่ `/my-reports`
      - เพิ่ม logic สำหรับแสดง NotificationPopup
      - จัดการ state `showNotifications` และ `unreadCount`
      - ดึง `full_name` จาก Supabase `users` table
@@ -43,7 +43,12 @@
      - นำทางตาม `response.isAdmin` (`/dashboard` หรือ `/home`)
      - เปลี่ยนจาก `axios` มาใช้ `fetch`
      - ลบ `/api/` นำหน้า endpoint
- - [`Softdev_Frontend/src/pages/admin/AdminDashboard.jsx`](Softdev_Frontend/src/pages/admin/AdminDashboard.jsx): เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
+ - [`Softdev_Frontend/src/pages/admin/AdminDashboard.jsx`](Softdev_Frontend/src/pages/admin/AdminDashboard.jsx):
+     - เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
+     - เพิ่มกราฟสถิติการแจ้งซ่อมแบ่งตามสถานที่ (Bar Chart)
+     - เพิ่มกราฟสัดส่วนสถานะงาน (Donut Chart)
+     - เพิ่มกราฟจำนวนแจ้งซ่อมรายเดือน (Bar Chart)
+     - จัด Layout กราฟเป็น 3 คอลัมน์แบบ Responsive
  - [`Softdev_Frontend/src/pages/admin/ManageRequests.jsx`](Softdev_Frontend/src/pages/admin/ManageRequests.jsx): เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
  - [`Softdev_Frontend/src/pages/admin/RequestDetail.jsx`](Softdev_Frontend/src/pages/admin/RequestDetail.jsx):
      - เปลี่ยนการ import และการใช้งาน `requests` เป็น `reports`
@@ -66,9 +71,12 @@
     - เพิ่มการ validate ประเภทไฟล์รูปภาพที่อัปโหลดได้ (.jpg, .jpeg, .png, .gif, .webp)
     - เพิ่มระบบเลือกอุปกรณ์แบบ Cascading Dropdown 3 ขั้นตอน (ห้อง/สถานที่, ประเภทอุปกรณ์, อุปกรณ์)
     - ดึงข้อมูล locations, asset_categories, assets จาก Supabase จริง
+    - เปลี่ยนช่อง "รายละเอียด" (description) จาก required → optional
  - `Softdev_Frontend/data/mock.js`:
     - เพิ่มฟังก์ชัน `addRepairCost` สำหรับบันทึกค่าใช้จ่ายลงในหน่วยความจำจำลอง
     - เพิ่มฟังก์ชัน `updateReportStatus` สำหรับอัปเดตสถานะคำขอและเวลาปิดงาน
+ - `Softdev_Frontend/src/styles.css`:
+    - เพิ่ม Style สำหรับ Chart Grid และ Chart Cards ใน Admin Dashboard
  - `.env.example` และ `package-lock.json`: จัดการไฟล์ build ที่เกี่ยวข้อง (ลบ `.env.example`, แก้ไข `package-lock.json`)
  
  ## API Endpoints ที่ใช้
@@ -80,12 +88,12 @@
  
  ## Supabase Query Patterns ที่ใช้
  - `supabase.auth.getUser()`: สำหรับดึงข้อมูล session ของผู้ใช้
- - `supabase.from('users').select('full_name').eq('user_id', user.id).single()`: สำหรับดึง `full_name` ของ user จาก table `users`
+ - `supabase.from(\'users\').select(\'full_name\').eq(\'user_id\', user.id).single()`: สำหรับดึง `full_name` ของ user จาก table `users`
  - **ข้อควรทราบ:** สำหรับ `reports` ที่มี Foreign Key ไปยัง `users` สองตัว (reporter_id, technician_id) ต้องระบุ `users!reporter_id(full_name)` หรือ `users!technician_id(full_name)` เพื่อหลีกเลี่ยง ambiguous relationship ในอนาคต (ใน `data/mock.js` ใช้การ `enrichReports` เพื่อจำลองการ join)
  
  ## โครงสร้าง Component ที่มีอยู่และใช้งาน
  ### `UserNavbar` ([`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx))
- - **หน้าที่:** แถบนำทางสำหรับผู้ใช้งาน (นักศึกษา), แสดงโลโก้, ช่องค้นหา, ลิงก์ 'Home' และ 'List', ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
+ - **หน้าที่:** แถบนำทางสำหรับผู้ใช้งาน (นักศึกษา), แสดงโลโก้, ช่องค้นหา, ลิงก์ \'Home\' และ \'List\', ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
  - **การใช้งาน:** นำมาใช้ในหน้า `MyReports.jsx` และ `ReportPage.jsx`
  - **การปรับปรุง:** เพิ่ม logic การแสดง NotificationPopup และการจัดการ `unreadCount`, ดึง `full_name` จาก Supabase, ลบ `currentUserId`
  
@@ -102,6 +110,11 @@
  - **หน้าที่:** แสดงรายการแจ้งเตือนแบบ popup เมื่อผู้ใช้คลิกที่ bell icon ใน `UserNavbar`
  - **การใช้งาน:** ถูก render แบบมีเงื่อนไขใน `UserNavbar.jsx`
  - **การพัฒนา:** ดึงข้อมูลการแจ้งเตือนจาก Backend API (`/Notification/MyNotifications`), แสดงสถานะแบบ color-coded, วันที่/เวลา, รายละเอียด (จาก `desc`), และชื่อช่าง (ถ้ามี), มีการทำเครื่องหมายว่าอ่านแล้ว (`/Notification/MarkAllAsRead`)
+ 
+ ### `Navbar` ([`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx))
+ - **หน้าที่:** แถบนำทางสำหรับผู้ดูแลระบบ (Admin), แสดงโลโก้, Breadcrumb, ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
+ - **การใช้งาน:** นำมาใช้ใน `Layout.jsx`
+ - **การปรับปรุง:** เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Layout.jsx`, ปรับปรุงการแสดงผล Bell Icon และ Badge
  
  ## สิ่งที่ยังไม่ได้ทำ (TODO)
  - Backend Admin API ยังไม่มี (ปัจจุบันใช้ mock data อยู่)
@@ -220,7 +233,7 @@
  | `/register` | `Register` | No | Registration screen |
  | `/home` | `Report` | No* | User landing page |
  | `/report` | `ReportPage` | No* | Submission form |
- | `/my-reports` | `MyReports` | No* | User's own reports |
+ | `/my-reports` | `MyReports` | No* | User\'s own reports |
  | `/dashboard` | `AdminDashboard` | **Yes (Layout)** | Admin overview |
  | `/requests` | `ManageRequests` | **Yes (Layout)** | Request list |
  | `/requests/:id` | `RequestDetail` | **Yes (Layout)** | Detailed request view |
