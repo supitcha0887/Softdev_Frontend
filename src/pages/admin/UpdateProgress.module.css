@@ -143,6 +143,11 @@
     color: #333;
 }
 
+.closeJobButton {
+    background-color: #ef4444;
+    color: white;
+}
+
 .backButton {
     background-color: #f8f9fa;
     border: 1px solid #ced4da;

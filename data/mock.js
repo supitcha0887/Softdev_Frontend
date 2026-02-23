@@ -185,6 +185,15 @@ export const addRepairCost = (reportId, costItem) => {
   return newCost
 }
 
+export const updateReportStatus = (reportId, status, completedAt = null) => {
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    report.status = status;
+    if (completedAt) report.completed_at = completedAt;
+  }
+};
+
+
 
 export const notifications = [
   { id: "NOT001", user_id: "USER001", title: "คำร้องของคุณ REP001 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง 'เครื่องปรับอากาศไม่เย็น' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP001", create_at: "2024-03-01T10:05:00Z" },

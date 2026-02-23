@@ -110,6 +110,13 @@ export default function RequestDetail() {
             >
               บันทึกค่าใช้จ่าย Log Cost
             </Link>
+            <Link 
+              className="btn-danger" 
+              to={`/requests/${id}/close-job`} 
+              style={{ display: 'block', marginTop: 10, textAlign: 'center', textDecoration: 'none' }}
+            >
+              ปิดงานซ่อม Close Job
+            </Link>
           </Card>
 
           <Card>
