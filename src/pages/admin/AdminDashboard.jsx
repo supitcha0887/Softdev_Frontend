@@ -1,7 +1,17 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
 import { reports, stats, statusToneList } from "../../../data/mock.js";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 
 function StatIcon({ type }) {
   const common = {
@@ -91,6 +101,17 @@ function StatIcon({ type }) {
 }
 
 export default function AdminDashboard() {
+  const chartData = useMemo(() => {
+    const counts = {};
+    reports.forEach((r) => {
+      const loc = r.locationTH || "อื่นๆ";
+      counts[loc] = (counts[loc] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, []);
+
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+
   return (
     <>
       <section className="hero hero-dashboard">
@@ -147,6 +168,30 @@ export default function AdminDashboard() {
             </div>
           </Card>
         </div>
+
+        <Card className="dashboard-chart-card">
+          <div className="dash-head">
+            <div className="dash-title">สถิติการแจ้งซ่อมแบ่งตามสถานที่ / Reports by Location</div>
+          </div>
+          <div style={{ width: "100%", height: 300, marginTop: 20 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
 
         <div className="dash-grid">
           <Card className="dash-main">

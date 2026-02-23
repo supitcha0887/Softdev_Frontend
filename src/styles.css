@@ -151,6 +151,11 @@ body{
 
 
 .side-card{ padding:14px; }
+
+.dashboard-chart-card {
+  margin-top: 14px;
+}
+
 .side-title{ font-weight:900; font-size:13px; margin-bottom:10px; }
 .workload{ display:flex; flex-direction:column; gap:10px; }
 .work-row{
