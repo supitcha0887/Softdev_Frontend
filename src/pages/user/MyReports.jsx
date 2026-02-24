@@ -13,6 +13,7 @@ function MyReports() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchReports();
@@ -62,6 +63,14 @@ function MyReports() {
     }
   };
 
+  // กรอง ตาม search query (title)
+  const filteredMyReports = myReports.filter((r) =>
+    searchQuery === "" || r.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredOtherReports = otherReports.filter((r) =>
+    searchQuery === "" || r.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -70,12 +79,20 @@ function MyReports() {
 
   return (
     <div className={styles.container}>
-      <UserNavbar />
+      <UserNavbar onSearch={(q) => setSearchQuery(q)} />
 
       <main className={styles.mainContent}>
         {/* Section 1: My Repair Reports */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>รายการแจ้งซ่อมของฉัน</h2>
+          <h2 className={styles.sectionTitle}>
+            รายการแจ้งซ่อมของฉัน
+            {searchQuery && (
+              <span className={styles.searchTag}>
+                ค้นหา: "{searchQuery}"
+                <button onClick={() => setSearchQuery("")} className={styles.clearSearch}>×</button>
+              </span>
+            )}
+          </h2>
           
           <div className={styles.filterSortBar}>
             <div className={styles.statusFilters}>
@@ -106,12 +123,12 @@ function MyReports() {
           {loading && <p>Loading reports...</p>}
           {error && <p className={styles.errorText}>Error: {error}</p>}
 
-          {!loading && !error && myReports.length === 0 && (
-            <p>คุณยังไม่มีรายการแจ้งซ่อม</p>
+          {!loading && !error && filteredMyReports.length === 0 && (
+            <p>{searchQuery ? `ไม่พบรายการที่มีชื่อ "${searchQuery}"` : "คุณยังไม่มีรายการแจ้งซ่อม"}</p>
           )}
 
           <div className={styles.reportsGrid}>
-            {myReports.map((report) => (
+            {filteredMyReports.map((report) => (
               <RepairCard
                 key={report.report_id}
                 image={report.image_before_url}
@@ -130,12 +147,12 @@ function MyReports() {
           {loading && <p>Loading reports...</p>}
           {error && <p className={styles.errorText}>Error: {error}</p>}
 
-          {!loading && !error && otherReports.length === 0 && (
-            <p>ไม่มีรายการแจ้งซ่อมอื่นๆ</p>
+          {!loading && !error && filteredOtherReports.length === 0 && (
+            <p>{searchQuery ? `ไม่พบรายการที่มีชื่อ "${searchQuery}"` : "ไม่มีรายการแจ้งซ่อมอื่นๆ"}</p>
           )}
 
           <div className={styles.reportsGrid}>
-            {otherReports.map((report) => (
+            {filteredOtherReports.map((report) => (
               <RepairCard
                 key={report.report_id}
                 image={report.image_before_url}
