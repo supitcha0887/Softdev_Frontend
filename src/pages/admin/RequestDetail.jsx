@@ -130,7 +130,7 @@ export default function RequestDetail() {
               <div className="kv-val">{assigned}</div>
             </div>
 
-            <div style={{ marginTop: 10 }}>
+            {/* <div style={{ marginTop: 10 }}>
               <select
                 value={currentStatus}
                 onChange={(e) => setCurrentStatus(e.target.value)}
@@ -142,7 +142,7 @@ export default function RequestDetail() {
                 <option value={STATUS.DONE}>{STATUS.DONE}</option>
                 <option value={STATUS.CANCELED}>{STATUS.CANCELED}</option>
               </select>
-            </div>
+            </div> */}
           </Card>
         </div>
 
