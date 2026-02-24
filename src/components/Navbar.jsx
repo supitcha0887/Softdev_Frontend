@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import svg from "../assets/svg.png";
 import user from "../assets/user.png";
 import styles from "./Navbar.module.css";
@@ -17,6 +18,7 @@ function IconBell() {
 
 export default function Navbar({ setNcOpen, notifs }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isList = pathname.startsWith("/requests");
 
   const unreadCount = useMemo(() => notifs.filter((n) => !n.read).length, [notifs]);
@@ -64,6 +66,16 @@ export default function Navbar({ setNcOpen, notifs }) {
               <img className="user-icon" src={user} alt="status" />
           <span>STAFF-0024</span>
       </div>
+        <button
+          className={styles.logoutBtn}
+          onClick={async () => {
+            await supabase.auth.signOut();
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+        >
+          ออกจากระบบ
+        </button>
       </div>
     </header>
   );
