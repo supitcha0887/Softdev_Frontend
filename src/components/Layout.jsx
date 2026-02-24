@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { notifications as seedNotifications } from "../../data/mock.js";
+import styles from "./NotificationCenter.module.css";
 
 function NotificationCenter({ open, onClose, items, markRead }) {
   const [tab, setTab] = useState("all");
@@ -26,9 +27,9 @@ function NotificationCenter({ open, onClose, items, markRead }) {
   }, [open]);
 
   const filtered = useMemo(() => {
-  const base = [...items];
+    const base = items ? [...items] : [];
 
-  if (tab === "unread") return base.filter((n) => !n.read);
+    if (tab === "unread") return base.filter((n) => !n.read);
   if (tab === "pending") return base.filter((n) => n.statusKey === "PENDING");   // ✅ รอรับงาน
   if (tab === "progress") return base.filter((n) => n.statusKey === "PROGRESS"); // ✅ ดำเนินการ
   if (tab === "done") return base.filter((n) => n.statusKey === "DONE");
@@ -47,7 +48,7 @@ function NotificationCenter({ open, onClose, items, markRead }) {
             <div className="nc-sub">Notifications Center</div>
           </div>
 
-          <button className="nc-close" onClick={onClose} type="button" aria-label="close">
+          <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="close">
             ×
           </button>
         </div>
@@ -116,7 +117,7 @@ export default function Layout() {
   const [ncOpen, setNcOpen] = useState(false);
 
   // ✅ ทำให้แจ้งเตือนเป็น state เพื่ออัปเดต read ได้
-  const [notifs, setNotifs] = useState(seedNotifications);
+  const [notifs, setNotifs] = useState(seedNotifications || []);
 
   const markRead = (id) => {
     setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
@@ -124,7 +125,7 @@ export default function Layout() {
 
   return (
     <div className="app">
-      <Navbar />
+      <Navbar setNcOpen={setNcOpen} notifs={notifs} />
 
       <Outlet />
 

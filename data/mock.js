@@ -174,18 +174,39 @@ export const repair_costs = [
   { id: "COST011", report_id: "REP009", item_name: "ชุดลูกลอยชักโครก", quantity: 1, unit_price: 350, total_price: 350, supplier: "บุญถาวร", note: "เปลี่ยนชุดลูกลอยที่เสีย" },
 ];
 
+export const addRepairCost = (reportId, costItem) => {
+  const newCost = {
+    cost_id: crypto.randomUUID(),
+    report_id: reportId,
+    ...costItem,
+    created_at: new Date().toISOString()
+  }
+  repair_costs.push(newCost)
+  return newCost
+}
+
+export const updateReportStatus = (reportId, status, completedAt = null) => {
+  const report = reports.find(r => r.id === reportId);
+  if (report) {
+    report.status = status;
+    if (completedAt) report.completed_at = completedAt;
+  }
+};
+
+
+
 export const notifications = [
-  { id: "NOT001", user_id: "USER001", title: "คำร้องของคุณ REP001 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง \'เครื่องปรับอากาศไม่เย็น\' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP001", create_at: "2024-03-01T10:05:00Z" },
-  { id: "NOT002", user_id: "USER003", title: "คำร้อง REP002 ได้รับการอนุมัติ", desc: "คำร้อง \'โปรเจคเตอร์เปิดไม่ติด\' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP002", create_at: "2024-03-02T12:05:00Z" },
+  { id: "NOT001", user_id: "USER001", title: "คำร้องของคุณ REP001 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง 'เครื่องปรับอากาศไม่เย็น' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP001", create_at: "2024-03-01T10:05:00Z" },
+  { id: "NOT002", user_id: "USER003", title: "คำร้อง REP002 ได้รับการอนุมัติ", desc: "คำร้อง 'โปรเจคเตอร์เปิดไม่ติด' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP002", create_at: "2024-03-02T12:05:00Z" },
   { id: "NOT003", user_id: "USER010", title: "มีคำร้องใหม่ REP002 สำหรับคุณ", desc: "โปรเจคเตอร์เปิดไม่ติดในห้อง 302", type: "warning", is_read: false, related_report_id: "REP002", create_at: "2024-03-02T12:06:00Z" },
-  { id: "NOT004", user_id: "USER004", title: "คำร้อง REP003 อยู่ระหว่างดำเนินการ", desc: "คำร้อง \'จอคอมพิวเตอร์เสีย\' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: true, related_report_id: "REP003", create_at: "2024-03-03T10:35:00Z" },
+  { id: "NOT004", user_id: "USER004", title: "คำร้อง REP003 อยู่ระหว่างดำเนินการ", desc: "คำร้อง 'จอคอมพิวเตอร์เสีย' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: true, related_report_id: "REP003", create_at: "2024-03-03T10:35:00Z" },
   { id: "NOT005", user_id: "USER010", title: "อัปเดตสถานะ REP003", desc: "เริ่มดำเนินการตรวจสอบจอคอมพิวเตอร์ในห้อง 301", type: "info", is_read: false, related_report_id: "REP003", create_at: "2024-03-03T10:36:00Z" },
-  { id: "NOT006", user_id: "USER006", title: "คำร้อง REP004 เสร็จสมบูรณ์", desc: "คำร้อง \'เครื่องพิมพ์กระดาษติด\' ของคุณได้รับการแก้ไขเรียบร้อยแล้ว", type: "success", is_read: false, related_report_id: "REP004", create_at: "2024-03-04T15:05:00Z" },
-  { id: "NOT007", user_id: "USER007", title: "คำร้องของคุณ REP005 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง \'ปลั๊กไฟชำรุด\' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP005", create_at: "2024-03-05T08:50:00Z" },
-  { id: "NOT008", user_id: "USER008", title: "คำร้อง REP006 ได้รับการอนุมัติ", desc: "คำร้อง \'เก้าอี้ห้องเรียนหัก\' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: true, related_report_id: "REP006", create_at: "2024-03-06T14:35:00Z" },
-  { id: "NOT009", user_id: "USER002", title: "คำร้อง REP007 อยู่ระหว่างดำเนินการ", desc: "คำร้อง \'Router ห้อง Server ไม่ทำงาน\' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: false, related_report_id: "REP007", create_at: "2024-03-07T09:50:00Z" },
-  { id: "NOT010", user_id: "USER009", title: "คำร้อง REP009 ถูกยกเลิก", desc: "คำร้อง \'น้ำรั่วจากชักโครก\' ของคุณถูกยกเลิกเนื่องจากต้องรออะไหล่", type: "error", is_read: false, related_report_id: "REP009", create_at: "2024-03-09T16:40:00Z" },
-  { id: "NOT011", user_id: "USER001", title: "คำร้อง REP011 ได้รับการอนุมัติ", desc: "คำร้อง \'โปรแกรม Adobe Photoshop ใช้งานไม่ได้\' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP011", create_at: "2024-03-11T13:35:00Z" },
+  { id: "NOT006", user_id: "USER006", title: "คำร้อง REP004 เสร็จสมบูรณ์", desc: "คำร้อง 'เครื่องพิมพ์กระดาษติด' ของคุณได้รับการแก้ไขเรียบร้อยแล้ว", type: "success", is_read: false, related_report_id: "REP004", create_at: "2024-03-04T15:05:00Z" },
+  { id: "NOT007", user_id: "USER007", title: "คำร้องของคุณ REP005 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง 'ปลั๊กไฟชำรุด' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP005", create_at: "2024-03-05T08:50:00Z" },
+  { id: "NOT008", user_id: "USER008", title: "คำร้อง REP006 ได้รับการอนุมัติ", desc: "คำร้อง 'เก้าอี้ห้องเรียนหัก' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: true, related_report_id: "REP006", create_at: "2024-03-06T14:35:00Z" },
+  { id: "NOT009", user_id: "USER002", title: "คำร้อง REP007 อยู่ระหว่างดำเนินการ", desc: "คำร้อง 'Router ห้อง Server ไม่ทำงาน' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: false, related_report_id: "REP007", create_at: "2024-03-07T09:50:00Z" },
+  { id: "NOT010", user_id: "USER009", title: "คำร้อง REP009 ถูกยกเลิก", desc: "คำร้อง 'น้ำรั่วจากชักโครก' ของคุณถูกยกเลิกเนื่องจากต้องรออะไหล่", type: "error", is_read: false, related_report_id: "REP009", create_at: "2024-03-09T16:40:00Z" },
+  { id: "NOT011", user_id: "USER001", title: "คำร้อง REP011 ได้รับการอนุมัติ", desc: "คำร้อง 'โปรแกรม Adobe Photoshop ใช้งานไม่ได้' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP011", create_at: "2024-03-11T13:35:00Z" },
 ];
 
 const calculateStats = (reports) => {

@@ -55,10 +55,7 @@ body{
 .dot{ opacity:.6; }
 
 .topbar-right{ display:flex; align-items:center; gap:10px; }
-.icon-btn{
-  width:36px; height:36px; border:1px solid var(--border);
-  background:#fff; border-radius:10px; display:grid; place-items:center; cursor:pointer;
-}
+
 .user-chip{
   display:flex; align-items:center; gap:8px;
   border:1px solid var(--border); background:var(--red); border-radius:999px; color:#fff;
@@ -151,6 +148,39 @@ body{
 
 
 .side-card{ padding:14px; }
+
+.dashboard-section-title {
+  font-weight: 900;
+  font-size: 18px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-chart-card {
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  flex-grow: 1;
+  min-height: 0;
+}
+
 .side-title{ font-weight:900; font-size:13px; margin-bottom:10px; }
 .workload{ display:flex; flex-direction:column; gap:10px; }
 .work-row{
@@ -450,40 +480,7 @@ select{ min-width:180px; }
   .status-line{ display:none; }
 }
 
-/* ===== Bell badge ===== */
-.bell-btn{
-  position:relative; /* สำคัญมาก ให้ badge อิงตำแหน่งกับปุ่ม */
-  color:#111827;
-}
 
-/* badge แสดงเลข */
-.bell-badge{
-  position:absolute;
-  top:-6px;
-  right:-6px;
-  z-index:2;
-
-  background:#ef4444;
-  color:#fff;
-
-  font-size:11px;
-  font-weight:800;
-  line-height:1;
-
-  min-width:18px;
-  height:18px;
-  padding:0 6px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  border-radius:999px;
-  border:2px solid #fff;
-}
-.bell-badge{
-  pointer-events:none;
-}
 
 .nc-unread .nc-main-title{
   font-weight:950;
@@ -533,16 +530,7 @@ select{ min-width:180px; }
 .nc-title{ font-weight:900; font-size:18px; }
 .nc-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
 
-.nc-close{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid #f1f2f4;
-  background:#f3f4f6;
-  cursor:pointer;
-  font-size:18px;
-  line-height:1;
-}
+
 
 .nc-tabs{
   display:flex;

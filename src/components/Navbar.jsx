@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { notifications as seedNotifications } from "../../data/mock.js";
+import React, { useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 import svg from "../assets/svg.png";
 import user from "../assets/user.png";
+import styles from "./Navbar.module.css";
 
 function IconBell() {
   return (
@@ -15,14 +16,10 @@ function IconBell() {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ setNcOpen, notifs }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isList = pathname.startsWith("/requests");
-
-  const [ncOpen, setNcOpen] = useState(false);
-
-  // ✅ ทำให้แจ้งเตือนเป็น state เพื่ออัปเดต read ได้
-  const [notifs, setNotifs] = useState(seedNotifications);
 
   const unreadCount = useMemo(() => notifs.filter((n) => !n.read).length, [notifs]);
 
@@ -50,7 +47,7 @@ export default function Navbar() {
 
         {/* ✅ Bell + numeric badge */}
         <button
-          className="icon-btn bell-btn"
+          className={styles.notificationBtn}
           aria-label="notifications"
           type="button"
           onClick={() => setNcOpen(true)}
@@ -59,7 +56,7 @@ export default function Navbar() {
 
           {/* ✅ แสดงเป็นตัวเลขเมื่อมี unread และซ่อนเมื่อ 0 */}
           {unreadCount > 0 && (
-            <span className="bell-badge" aria-label={`${unreadCount} unread`}>
+            <span className={styles.notificationBadge} aria-label={`${unreadCount} unread`}>
               {badgeText}
             </span>
           )}
@@ -69,6 +66,16 @@ export default function Navbar() {
               <img className="user-icon" src={user} alt="status" />
           <span>STAFF-0024</span>
       </div>
+        <button
+          className={styles.logoutBtn}
+          onClick={async () => {
+            await supabase.auth.signOut();
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+        >
+          ออกจากระบบ
+        </button>
       </div>
     </header>
   );

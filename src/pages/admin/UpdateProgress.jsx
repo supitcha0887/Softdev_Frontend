@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { reports as mockReports } from '../../../data/mock';
 import { Card, Pill } from '../../components/UI';
 import styles from './UpdateProgress.module.css';
+import { compressImage, formatFileSize } from '../../utils/imageUtils';
 
 // Mock icons for meta details, replace with actual icons if available
 const LocationIcon = () => '📍';
@@ -52,6 +53,9 @@ export default function UpdateProgress() {
     const [progressHistory, setProgressHistory] = useState(report?.progress || []);
     const [imagePreview, setImagePreview] = useState(null);
     const [imageFile, setImageFile] = useState(null);
+    const [originalFileSize, setOriginalFileSize] = useState(null);
+    const [compressedFileSize, setCompressedFileSize] = useState(null);
+    const [isCompressing, setIsCompressing] = useState(false);
 
 
     const handleChecklistChange = (position) => {
@@ -61,21 +65,48 @@ export default function UpdateProgress() {
         setCheckedState(updatedCheckedState);
     };
     
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
-                e.target.value = null;
-                return;
-            }
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+        if (!file) {
+            setImageFile(null);
+            setImagePreview(null);
+            setOriginalFileSize(null);
+            setCompressedFileSize(null);
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
+            e.target.value = null;
+            return;
+        }
+
+        // 1. Check original file size limit
+        if (file.size > 10 * 1024 * 1024) {
+            alert("ขนาดไฟล์ต้องไม่เกิน 10 MB กรุณาเลือกรูปใหม่");
+            e.target.value = null;
+            return;
+        }
+
+        setOriginalFileSize(formatFileSize(file.size));
+        setImagePreview(URL.createObjectURL(file));
+        setIsCompressing(true);
+
+        try {
+            const compressedFile = await compressImage(file, 10);
+            setImageFile(compressedFile);
+            setCompressedFileSize(formatFileSize(compressedFile.size));
+            setImagePreview(URL.createObjectURL(compressedFile));
+        } catch (error) {
+            console.error("Image compression failed:", error);
+            alert("เกิดข้อผิดพลาดในการบีบอัดรูปภาพ");
+            setImageFile(null);
+            setImagePreview(null);
+            setOriginalFileSize(null);
+            setCompressedFileSize(null);
+        } finally {
+            setIsCompressing(false);
         }
     };
 
@@ -99,6 +130,8 @@ export default function UpdateProgress() {
         setCheckedState(new Array(CHECKLIST_ITEMS.length).fill(false));
         setImageFile(null);
         setImagePreview(null);
+        setOriginalFileSize(null);
+        setCompressedFileSize(null);
         
         alert('อัปเดตความคืบหน้าสำเร็จ!');
     };
@@ -190,7 +223,17 @@ export default function UpdateProgress() {
                                     ) : (
                                         'คลิกเพื่ออัปโหลดรูปภาพ'
                                     )}
+                                    {isCompressing && (
+                                        <div className={styles.loadingOverlay}>
+                                            <span>กำลังย่อขนาดรูปภาพ...</span>
+                                        </div>
+                                    )}
                                 </div>
+                                {originalFileSize && (
+                                    <p className={styles.fileInfo}>
+                                        ขนาดไฟล์: {originalFileSize} {compressedFileSize && `→ ${compressedFileSize}`}
+                                    </p>
+                                )}
                                 <input 
                                     type="file" 
                                     ref={fileInputRef} 
@@ -201,7 +244,9 @@ export default function UpdateProgress() {
                                 />
                             </div>
                             <div className={styles.buttonGroup}>
-                                <button type="submit" className={styles.saveButton}>บันทึกการอัปเดต</button>
+                                <button type="submit" className={styles.saveButton} disabled={isCompressing}>บันทึกการอัปเดต</button>
+                                <button type="button" className={styles.costButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>บันทึกค่าใช้จ่าย</button>
+                                <button type="button" className={styles.closeJobButton} onClick={() => navigate(`/requests/${id}/close-job`)}>ปิดงานซ่อม</button>
                                 <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
                             </div>
                         </form>

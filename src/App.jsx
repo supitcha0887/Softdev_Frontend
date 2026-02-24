@@ -5,6 +5,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import ManageRequests from "./pages/admin/ManageRequests.jsx";
 import RequestDetail from "./pages/admin/RequestDetail.jsx";
 import UpdateProgress from "./pages/admin/UpdateProgress.jsx";
+import CostLogging from "./pages/admin/CostLogging.jsx";
+import CloseJob from "./pages/admin/CloseJob.jsx";
 import Login from "./pages/user/Login.jsx";
 import Register from "./pages/user/Register.jsx";
 import ReportPage from "./pages/user/ReportPage.jsx";
@@ -28,6 +30,8 @@ function App() {
         <Route path="requests" element={<ManageRequests />} />
         <Route path="requests/:id" element={<RequestDetail />} />
         <Route path="requests/:id/update-progress" element={<UpdateProgress />} />
+        <Route path="requests/:id/cost-logging" element={<CostLogging />} />
+        <Route path="requests/:id/close-job" element={<CloseJob />} />
 
         {/* ถ้าอยู่ภายใต้ Layout แล้วหาหน้าไม่เจอ ให้เด้งไป Dashboard */}
         <Route path="*" element={<Navigate to="/login" replace />} />

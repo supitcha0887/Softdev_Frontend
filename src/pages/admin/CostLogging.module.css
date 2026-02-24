@@ -1,0 +1,185 @@
+/* CostLogging.module.css */
+
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cardHeader h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.addItemBtn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup label {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #4a5568;
+}
+
+.formGroup input {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.disabledInput {
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+}
+
+.fullWidth {
+    grid-column: 1 / -2; /* Span all columns except the last one (check button) */
+}
+
+.confirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: #28a745;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+}
+
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #94a3b8;
+}
+
+.emptyIcon {
+    margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    color: #475569;
+    margin: 0 0 0.5rem;
+}
+
+.emptyState p {
+    margin: 0;
+}
+
+/* Table */
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.costTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.costTable th,
+.costTable td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.costTable th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.deleteBtn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0;
+    line-height: 1;
+}
+
+/* Summary Card */
+.summaryCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summaryContent h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: #475569;
+}
+.summaryContent p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+.totalAmount {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ef4444;
+}
+
+.totalAmount span {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #64748b;
+    margin-left: 0.5rem;
+}
+
+.saveBtn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.saveBtn span {
+    font-size: 0.8rem;
+    font-weight: normal;
+    opacity: 0.9;
+}

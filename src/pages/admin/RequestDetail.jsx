@@ -103,6 +103,20 @@ export default function RequestDetail() {
             <button className="btn-warn" type="button" onClick={cancelJob}>
               ยกเลิกงานซ่อม Cancel Job
             </button>
+            <Link 
+              className="btn-light" 
+              to={`/requests/${id}/cost-logging`} 
+              style={{ display: 'block', marginTop: 10, textAlign: 'center', textDecoration: 'none' }}
+            >
+              บันทึกค่าใช้จ่าย Log Cost
+            </Link>
+            <Link 
+              className="btn-danger" 
+              to={`/requests/${id}/close-job`} 
+              style={{ display: 'block', marginTop: 10, textAlign: 'center', textDecoration: 'none' }}
+            >
+              ปิดงานซ่อม Close Job
+            </Link>
           </Card>
 
           <Card>
