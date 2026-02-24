@@ -4,10 +4,14 @@ import styles from './ReportPage.module.css';
 import UserNavbar from '../../components/UserNavbar';
 import Footer from '../../components/Footer';
 import { supabase, getAccessToken } from '../../supabaseClient';
+import { compressImage, formatFileSize } from '../../utils/imageUtils';
 
 function ReportPage() {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [originalFileSize, setOriginalFileSize] = useState(null);
+  const [compressedFileSize, setCompressedFileSize] = useState(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [assets, setAssets] = useState([]);
   const [locations, setLocations] = useState([]);
   const [assetCategories, setAssetCategories] = useState([]);
@@ -44,21 +48,48 @@ function ReportPage() {
     fetchInitialData();
   }, []);
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
-        e.target.value = null;
-        return;
-      }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      setImageFile(null);
+      setImagePreview(null);
+      setOriginalFileSize(null);
+      setCompressedFileSize(null);
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
+      e.target.value = null;
+      return;
+    }
+
+    // 1. Check original file size limit
+    if (file.size > 10 * 1024 * 1024) {
+      alert("ขนาดไฟล์ต้องไม่เกิน 10 MB กรุณาเลือกรูปใหม่");
+      e.target.value = null;
+      return;
+    }
+
+    setOriginalFileSize(formatFileSize(file.size));
+    setImagePreview(URL.createObjectURL(file));
+    setIsCompressing(true);
+
+    try {
+      const compressedFile = await compressImage(file, 10);
+      setImageFile(compressedFile);
+      setCompressedFileSize(formatFileSize(compressedFile.size));
+      setImagePreview(URL.createObjectURL(compressedFile));
+    } catch (error) {
+      console.error("Image compression failed:", error);
+      alert("เกิดข้อผิดพลาดในการบีบอัดรูปภาพ");
+      setImageFile(null);
+      setImagePreview(null);
+      setOriginalFileSize(null);
+      setCompressedFileSize(null);
+    } finally {
+      setIsCompressing(false);
     }
   };
 
@@ -208,7 +239,17 @@ function ReportPage() {
           <div className={styles.uploadBox} onClick={() => fileInputRef.current.click()}>
             <input type="file" id="fileUpload" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} accept="image/jpeg,image/png,image/gif,image/webp" />
             {imagePreview ? <img src={imagePreview} alt="Preview" className={styles.imagePreview} /> : 'อัพโหลดรูปภาพ'}
+            {isCompressing && (
+              <div className={styles.loadingOverlay}>
+                <span>กำลังย่อขนาดรูปภาพ...</span>
+              </div>
+            )}
           </div>
+          {originalFileSize && (
+            <p className={styles.fileInfo}>
+              ขนาดไฟล์: {originalFileSize} {compressedFileSize && `→ ${compressedFileSize}`}
+            </p>
+          )}
           {errors.image && <p className={styles.error}>{errors.image}</p>}
 
           <div className={styles.inputGroup}>
@@ -261,7 +302,7 @@ function ReportPage() {
           </div>
 
           <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.submitButton} disabled={loading}>
+            <button type="submit" className={styles.submitButton} disabled={loading || isCompressing}>
               {loading ? 'กำลังส่ง...' : 'ยืนยัน'}
             </button>
           </div>

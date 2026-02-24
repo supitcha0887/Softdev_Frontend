@@ -116,6 +116,25 @@
     text-align: center;
     cursor: pointer;
     color: #6c757d;
+    position: relative;
+}
+
+.loadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.fileInfo {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 0.5rem;
 }
 
 .buttonGroup {
