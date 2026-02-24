@@ -3,6 +3,7 @@ import { Outlet, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { notifications as seedNotifications } from "../../data/mock.js";
+import styles from "./NotificationCenter.module.css";
 
 function NotificationCenter({ open, onClose, items, markRead }) {
   const [tab, setTab] = useState("all");
@@ -47,7 +48,7 @@ function NotificationCenter({ open, onClose, items, markRead }) {
             <div className="nc-sub">Notifications Center</div>
           </div>
 
-          <button className="nc-close" onClick={onClose} type="button" aria-label="close">
+          <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="close">
             ×
           </button>
         </div>

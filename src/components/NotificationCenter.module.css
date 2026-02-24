@@ -1,0 +1,15 @@
+.closeBtn {
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111827;
+  font-size: 24px; /* Making it a bit larger to be more visible */
+  width: 34px;
+  height: 34px;
+}

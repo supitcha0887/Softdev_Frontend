@@ -530,16 +530,7 @@ select{ min-width:180px; }
 .nc-title{ font-weight:900; font-size:18px; }
 .nc-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
 
-.nc-close{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid #f1f2f4;
-  background:#f3f4f6;
-  cursor:pointer;
-  font-size:18px;
-  line-height:1;
-}
+
 
 .nc-tabs{
   display:flex;
