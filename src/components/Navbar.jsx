@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import svg from "../assets/svg.png";
 import user from "../assets/user.png";
+import styles from "./Navbar.module.css";
 
 function IconBell() {
   return (
@@ -44,7 +45,7 @@ export default function Navbar({ setNcOpen, notifs }) {
 
         {/* ✅ Bell + numeric badge */}
         <button
-          className="icon-btn bell-btn"
+          className={styles.notificationBtn}
           aria-label="notifications"
           type="button"
           onClick={() => setNcOpen(true)}
@@ -53,7 +54,7 @@ export default function Navbar({ setNcOpen, notifs }) {
 
           {/* ✅ แสดงเป็นตัวเลขเมื่อมี unread และซ่อนเมื่อ 0 */}
           {unreadCount > 0 && (
-            <span className="bell-badge" aria-label={`${unreadCount} unread`}>
+            <span className={styles.notificationBadge} aria-label={`${unreadCount} unread`}>
               {badgeText}
             </span>
           )}

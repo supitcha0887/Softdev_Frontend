@@ -55,10 +55,7 @@ body{
 .dot{ opacity:.6; }
 
 .topbar-right{ display:flex; align-items:center; gap:10px; }
-.icon-btn{
-  width:36px; height:36px; border:1px solid var(--border);
-  background:#fff; border-radius:10px; display:grid; place-items:center; cursor:pointer;
-}
+
 .user-chip{
   display:flex; align-items:center; gap:8px;
   border:1px solid var(--border); background:var(--red); border-radius:999px; color:#fff;
@@ -483,40 +480,7 @@ select{ min-width:180px; }
   .status-line{ display:none; }
 }
 
-/* ===== Bell badge ===== */
-.bell-btn{
-  position:relative; /* สำคัญมาก ให้ badge อิงตำแหน่งกับปุ่ม */
-  color:#111827;
-}
 
-/* badge แสดงเลข */
-.bell-badge{
-  position:absolute;
-  top:-6px;
-  right:-6px;
-  z-index:2;
-
-  background:#ef4444;
-  color:#fff;
-
-  font-size:11px;
-  font-weight:800;
-  line-height:1;
-
-  min-width:18px;
-  height:18px;
-  padding:0 6px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  border-radius:999px;
-  border:2px solid #fff;
-}
-.bell-badge{
-  pointer-events:none;
-}
 
 .nc-unread .nc-main-title{
   font-weight:950;
