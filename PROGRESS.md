@@ -19,6 +19,7 @@
  - [`Softdev_Frontend/src/pages/admin/CloseJob.module.css`](Softdev_Frontend/src/pages/admin/CloseJob.module.css) (สร้างใหม่)
  - [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) (สร้างใหม่)
  - [`Softdev_Frontend/src/components/NotificationCenter.module.css`](Softdev_Frontend/src/components/NotificationCenter.module.css) (สร้างใหม่)
+ - [`Softdev_Frontend/src/utils/imageUtils.js`](Softdev_Frontend/src/utils/imageUtils.js) (สร้างใหม่: ฟังก์ชันสำหรับบีบอัดรูปภาพและจัดการขนาดไฟล์)
  
  ### แก้ไข
  - [`Softdev_Frontend/index.html`](Softdev_Frontend/index.html):
@@ -61,6 +62,7 @@
      - ปรับปรุงการแสดงผล dropdown สถานะงานให้มีตัวเลือกที่แน่นอนและเป็นภาษาไทย
      - ปรับปรุงการแสดงผล checklist item ให้มีระยะห่างที่ถูกต้อง
      - เพิ่มระบบอัปโหลดรูปภาพพร้อม preview สำหรับรูปภาพหลังการซ่อม
+     - **เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB**
      - ปรับปรุง Header section ให้ใช้ style เดียวกับหน้า Admin อื่นๆ (background image และ text color)
      - เพิ่มปุ่มนำทางไปยังหน้าบันทึกค่าใช้จ่าย (`CostLogging`)
      - เพิ่มปุ่มนำทางไปยังหน้าปิดงานซ่อม (`CloseJob`)
@@ -69,11 +71,15 @@
      - ปรับปรุง style สำหรับ `.historyDot` ให้มี padding และสีตามสถานะที่ถูกต้อง
      - ลบ style ของ `.header` ที่ไม่ใช้แล้วออก
      - เพิ่ม style สำหรับปุ่ม `costButton` และ `closeJobButton`
+     - **เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)**
  - [`Softdev_Frontend/src/pages/user/ReportPage.jsx`](Softdev_Frontend/src/pages/user/ReportPage.jsx):
     - เพิ่มการ validate ประเภทไฟล์รูปภาพที่อัปโหลดได้ (.jpg, .jpeg, .png, .gif, .webp)
+    - **เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB**
     - เพิ่มระบบเลือกอุปกรณ์แบบ Cascading Dropdown 3 ขั้นตอน (ห้อง/สถานที่, ประเภทอุปกรณ์, อุปกรณ์)
     - ดึงข้อมูล locations, asset_categories, assets จาก Supabase จริง
     - เปลี่ยนช่อง "รายละเอียด" (description) จาก required → optional
+ - [`Softdev_Frontend/src/pages/user/ReportPage.module.css`](Softdev_Frontend/src/pages/user/ReportPage.module.css):
+    - **เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)**
  - [`Softdev_Frontend/data/mock.js`](Softdev_Frontend/data/mock.js):
     - เพิ่มฟังก์ชัน `addRepairCost` สำหรับบันทึกค่าใช้จ่ายลงในหน่วยความจำจำลอง
     - เพิ่มฟังก์ชัน `updateReportStatus` สำหรับอัปเดตสถานะคำขอและเวลาปิดงาน
@@ -133,6 +139,7 @@
  - ✅ เพิ่มปุ่มออกจากระบบ Admin Navbar
  - ✅ หน้า CostLogging
  - ✅ หน้า CloseJob
+ - ✅ **ระบบบีบอัดและจำกัดขนาดรูปภาพ (10MB)**
  
  ## ข้อควรระวัง
  - ห้ามยุ่งเกี่ยวกับโฟลเดอร์ `PSDP_Project` (เป็นส่วนของ Backend)
@@ -188,7 +195,9 @@
  │   ├── App.jsx             # Routing configuration
  │   ├── main.jsx            # Application entry point
  │   ├── styles.css          # Global styles
- │   └── supabaseClient.js   # Supabase configuration
+ │   ├── supabaseClient.js   # Supabase configuration
+ │   └── utils/
+ │       └── imageUtils.js   # NEW: Image processing utilities
  ├── index.html              # Entry HTML
  ├── package.json
  └── vite.config.js
@@ -297,6 +306,7 @@
  - **เพิ่มปุ่มออกจากระบบ Admin Navbar**
  - **หน้า CostLogging**
  - **หน้า CloseJob**
+ - **ระบบบีบอัดและจำกัดขนาดรูปภาพ (10MB)**
  
  #### 🔄 IN PROGRESS
  - **Admin Data Migration:** Moving admin pages from using `mock.js` to fetching from the `.NET` API.

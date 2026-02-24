@@ -41,11 +41,11 @@ Softdev_Frontend/
 │   ├── pages/
 │   │   ├── admin/          # Administrative interfaces
 │   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── CloseJob.jsx       # NEW: Job completion summary
-│   │   │   ├── CostLogging.jsx    # NEW: Cost logging system
+│   │   │   ├── CloseJob.jsx       # Job completion summary
+│   │   │   ├── CostLogging.jsx    # Cost logging system
 │   │   │   ├── ManageRequests.jsx
 │   │   │   ├── RequestDetail.jsx
-│   │   │   └── UpdateProgress.jsx
+│   │   │   └── UpdateProgress.jsx # Work progress management
 │   │   └── user/           # User interfaces (Reporter)
 │   │       ├── Login.jsx
 │   │       ├── MyReports.jsx
@@ -55,7 +55,9 @@ Softdev_Frontend/
 │   ├── App.jsx             # Routing configuration
 │   ├── main.jsx            # Application entry point
 │   ├── styles.css          # Global styles
-│   └── supabaseClient.js   # Supabase configuration
+│   ├── supabaseClient.js   # Supabase configuration
+│   └── utils/
+│       └── imageUtils.js   # Image processing & compression utilities
 ├── index.html              # Entry HTML
 ├── package.json
 └── vite.config.js
@@ -85,7 +87,7 @@ Softdev_Frontend/
 *   `/` : `Login` - หน้าจอเข้าสู่ระบบ
 *   `/register` : `Register` - หน้าจอลงทะเบียน
 *   `/home` : `Report` - หน้าหลักสำหรับผู้ใช้งาน
-*   `/report` : `ReportPage` - ฟอร์มสำหรับแจ้งซ่อม
+*   `/report` : `ReportPage` - ฟอร์มสำหรับแจ้งซ่อม (รองรับการบีบอัดรูปภาพอัตโนมัติ)
 *   `/my-reports` : `MyReports` - รายการแจ้งซ่อมส่วนตัวของผู้ใช้งาน
 
 ### Admin Side
@@ -93,7 +95,7 @@ Softdev_Frontend/
 *   `/dashboard` : `AdminDashboard` - ภาพรวมการแจ้งซ่อมสำหรับผู้ดูแลระบบ
 *   `/requests` : `ManageRequests` - รายการคำขอซ่อมทั้งหมด
 *   `/requests/:id` : `RequestDetail` - หน้ารายละเอียดคำขอซ่อม
-*   `/requests/:id/update-progress` : `UpdateProgress` - หน้าจัดการความคืบหน้าการซ่อม
+*   `/requests/:id/update-progress` : `UpdateProgress` - หน้าจัดการความคืบหน้าการซ่อม (รองรับการบีบอัดรูปภาพอัตโนมัติ)
 *   `/requests/:id/cost-logging` : `CostLogging` - หน้าระบบบันทึกค่าใช้จ่าย
 *   `/requests/:id/close-job` : `CloseJob` - หน้าสรุปและปิดงานซ่อม
 
@@ -135,4 +137,5 @@ VITE_API_BASE_URL=http://localhost:5070/api
 *   ห้ามยุ่งเกี่ยวกับโฟลเดอร์ `PSDP_Project` (เป็นส่วนของ Backend)
 *   ใน `reports` model มี Foreign Key สองตัวที่อ้างอิงถึง `users` (`reporter_id`, `technician_id`) ซึ่งอาจต้องมีการ `join` แบบ explicit ใน query ของ Supabase หรือ Backend เพื่อหลีกเลี่ยงความกำกวม
 *   หน้า Admin ทุกหน้า (`AdminDashboard`, `ManageRequests`, `RequestDetail`, `UpdateProgress`, `CostLogging`, `CloseJob`) ยังคงใช้ `data/mock.js` สำหรับข้อมูลหลักและการอัปเดต ต้องเปลี่ยนไปใช้ `fetch` calls กับ Backend API ในอนาคต
+*   **การอัปโหลดรูปภาพ:** ระบบมีการจำกัดขนาดไฟล์ไว้ที่ **10 MB** และจะทำการบีบอัด (Compress) รูปภาพอัตโนมัติเป็น JPEG ก่อนทำการอัปโหลดเพื่อประหยัดพื้นที่จัดเก็บ
 *   API endpoint ไม่มี `/api/` นำหน้า แต่ใช้ผ่าน `vite` proxy
