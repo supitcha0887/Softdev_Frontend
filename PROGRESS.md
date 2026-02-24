@@ -17,6 +17,8 @@
  - [`Softdev_Frontend/src/pages/admin/CostLogging.module.css`](Softdev_Frontend/src/pages/admin/CostLogging.module.css) (สร้างใหม่)
  - [`Softdev_Frontend/src/pages/admin/CloseJob.jsx`](Softdev_Frontend/src/pages/admin/CloseJob.jsx) (สร้างใหม่: หน้าสรุปและปิดงานซ่อม)
  - [`Softdev_Frontend/src/pages/admin/CloseJob.module.css`](Softdev_Frontend/src/pages/admin/CloseJob.module.css) (สร้างใหม่)
+ - [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) (สร้างใหม่)
+ - [`Softdev_Frontend/src/components/NotificationCenter.module.css`](Softdev_Frontend/src/components/NotificationCenter.module.css) (สร้างใหม่)
  
  ### แก้ไข
  - [`Softdev_Frontend/index.html`](Softdev_Frontend/index.html):
@@ -72,13 +74,18 @@
     - เพิ่มระบบเลือกอุปกรณ์แบบ Cascading Dropdown 3 ขั้นตอน (ห้อง/สถานที่, ประเภทอุปกรณ์, อุปกรณ์)
     - ดึงข้อมูล locations, asset_categories, assets จาก Supabase จริง
     - เปลี่ยนช่อง "รายละเอียด" (description) จาก required → optional
- - `Softdev_Frontend/data/mock.js`:
+ - [`Softdev_Frontend/data/mock.js`](Softdev_Frontend/data/mock.js):
     - เพิ่มฟังก์ชัน `addRepairCost` สำหรับบันทึกค่าใช้จ่ายลงในหน่วยความจำจำลอง
     - เพิ่มฟังก์ชัน `updateReportStatus` สำหรับอัปเดตสถานะคำขอและเวลาปิดงาน
- - `Softdev_Frontend/src/styles.css`:
+ - [`Softdev_Frontend/src/styles.css`](Softdev_Frontend/src/styles.css):
     - เพิ่ม Style สำหรับ Chart Grid และ Chart Cards ใน Admin Dashboard
- - `.env.example` และ `package-lock.json`: จัดการไฟล์ build ที่เกี่ยวข้อง (ลบ `.env.example`, แก้ไข `package-lock.json`)
- 
+    - ลบ `.icon-btn`, `.bell-btn`, `.bell-badge` ออก และย้ายไปไว้ใน [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) แทน
+ - [`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx):
+     - แก้ไขปุ่มระฆังให้อยู่ตรงกลางแนวตั้ง (แก้ไขสไตล์ `.notificationBtn`)
+     - เพิ่มปุ่ม "ออกจากระบบ" (outline สีแดง) และ logic signOut + ลบ token + navigate "/"
+ - [`Softdev_Frontend/src/components/Layout.jsx`](Softdev_Frontend/src/components/Layout.jsx):
+     - แก้ไขปุ่มปิด X ใน Notification Center (เปลี่ยน `className` จาก `nc-close` เป็น `styles.closeBtn`)
+
  ## API Endpoints ที่ใช้
  - `GET /Auth/me`: สำหรับตรวจสอบ Role ของผู้ใช้หลัง Login
  - `GET /Notification/MyNotifications`: สำหรับดึงรายการแจ้งเตือนของผู้ใช้
@@ -114,7 +121,7 @@
  ### `Navbar` ([`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx))
  - **หน้าที่:** แถบนำทางสำหรับผู้ดูแลระบบ (Admin), แสดงโลโก้, Breadcrumb, ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
  - **การใช้งาน:** นำมาใช้ใน `Layout.jsx`
- - **การปรับปรุง:** เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Layout.jsx`, ปรับปรุงการแสดงผล Bell Icon และ Badge
+ - **การปรับปรุง:** เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Layout.jsx`, ปรับปรุงการแสดงผล Bell Icon และ Badge, **แก้ไขปุ่มระฆัง Admin Navbar ให้อยู่ตรงกลางแนวตั้ง, เพิ่มปุ่มออกจากระบบ Admin Navbar**
  
  ## สิ่งที่ยังไม่ได้ทำ (TODO)
  - Backend Admin API ยังไม่มี (ปัจจุบันใช้ mock data อยู่)
@@ -122,6 +129,10 @@
  - หน้า Admin จัดการ User (ยังไม่มีการพัฒนา)
  - หน้า Admin ข้อมูลครุภัณฑ์ (ยังไม่มีการพัฒนา)
  - การสร้างหน้า Admin ใหม่ๆ จะต้องมีการเชื่อมต่อกับ Backend API จริง (ปัจจุบันใช้ mock data)
+ - ✅ แก้ไขปุ่มระฆัง Admin Navbar
+ - ✅ เพิ่มปุ่มออกจากระบบ Admin Navbar
+ - ✅ หน้า CostLogging
+ - ✅ หน้า CloseJob
  
  ## ข้อควรระวัง
  - ห้ามยุ่งเกี่ยวกับโฟลเดอร์ `PSDP_Project` (เป็นส่วนของ Backend)
@@ -158,6 +169,8 @@
  │   │   ├── RepairCard.jsx  # Summary card for reports
  │   │   ├── UI.jsx          # Primitive UI elements (Pill, Card)
  │   │   └── UserNavbar.jsx  # User-specific Navbar
+ │   │   ├── Navbar.module.css # NEW: Admin Navbar specific styles
+ │   │   └── NotificationCenter.module.css # NEW: Notification Center specific styles
  │   ├── pages/
  │   │   ├── admin/          # Administrative interfaces
  │   │   │   ├── AdminDashboard.jsx
@@ -280,6 +293,10 @@
  - Application routing and global layout structures.
  - Admin UI pages: Dashboard, List, Detail, Update Progress, Cost Logging, and Close Job.
  - Inter-page navigation for Admin repair workflow.
+ - **แก้ไขปุ่มระฆัง Admin Navbar**
+ - **เพิ่มปุ่มออกจากระบบ Admin Navbar**
+ - **หน้า CostLogging**
+ - **หน้า CloseJob**
  
  #### 🔄 IN PROGRESS
  - **Admin Data Migration:** Moving admin pages from using `mock.js` to fetching from the `.NET` API.
