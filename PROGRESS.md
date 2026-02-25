@@ -78,12 +78,19 @@
      - ปรับปรุง Header section ให้ใช้ style เดียวกับหน้า Admin อื่นๆ (background image และ text color)
      - เพิ่มปุ่มนำทางไปยังหน้าบันทึกค่าใช้จ่าย (`CostLogging`)
      - เพิ่มปุ่มนำทางไปยังหน้าปิดงานซ่อม (`CloseJob`)
+     - แก้ไขบั๊ก State Initialization ทำให้ฟอร์มเงื่อนไข (เช่น เช็คลิสต์, บันทึกการทำงาน) แสดงผลได้อย่างถูกต้องตั้งแต่โหลดหน้าจอครั้งแรก
  - [`Softdev_Frontend/src/pages/admin/UpdateProgress.module.css`](Softdev_Frontend/src/pages/admin/UpdateProgress.module.css):
      - ปรับปรุง style สำหรับ `.checkItem` และ `.checkItem input[type="checkbox"]` เพื่อระยะห่างที่เหมาะสม
      - ปรับปรุง style สำหรับ `.historyDot` ให้มี padding และสีตามสถานะที่ถูกต้อง
      - ลบ style ของ `.header` ที่ไม่ใช้แล้วออก
      - เพิ่ม style สำหรับปุ่ม `costButton` และ `closeJobButton`
      - เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)
+ - [`Softdev_Frontend/src/pages/admin/CostLogging.jsx`](Softdev_Frontend/src/pages/admin/CostLogging.jsx):
+    - ปรับปรุงให้การบันทึกค่าใช้จ่ายเป็นแบบตัวเลือก (Optional) ไม่บังคับกรอก สามารถข้ามไปหน้าปิดงานได้เลย
+ - [`Softdev_Frontend/src/pages/admin/CloseJob.jsx`](Softdev_Frontend/src/pages/admin/CloseJob.jsx):
+    - เพิ่มปุ่มย้อนกลับ 2 ปุ่ม คือ "แก้ไขข้อมูล (Edit Details)" และ "แก้ไขค่าใช้จ่าย (Edit Cost)"
+ - [`Softdev_Frontend/src/pages/admin/CloseJob.module.css`](Softdev_Frontend/src/pages/admin/CloseJob.module.css):
+    - ปรับปรุง UI ลดระยะห่าง (gap/margin) ของกลุ่มปุ่มกดให้ดูกระชับและเป็นหมวดหมู่มากขึ้น
  - [`Softdev_Frontend/src/pages/user/ReportPage.jsx`](Softdev_Frontend/src/pages/user/ReportPage.jsx):
     - เพิ่มการ validate ประเภทไฟล์รูปภาพที่อัปโหลดได้ (.jpg, .jpeg, .png, .gif, .webp)
     - เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB (ใช้ `imageUtils.js`)
