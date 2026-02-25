@@ -17,19 +17,31 @@
  - [`Softdev_Frontend/src/pages/admin/CostLogging.module.css`](Softdev_Frontend/src/pages/admin/CostLogging.module.css) (สร้างใหม่)
  - [`Softdev_Frontend/src/pages/admin/CloseJob.jsx`](Softdev_Frontend/src/pages/admin/CloseJob.jsx) (สร้างใหม่: หน้าสรุปและปิดงานซ่อม)
  - [`Softdev_Frontend/src/pages/admin/CloseJob.module.css`](Softdev_Frontend/src/pages/admin/CloseJob.module.css) (สร้างใหม่)
- - [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) (สร้างใหม่)
- - [`Softdev_Frontend/src/components/NotificationCenter.module.css`](Softdev_Frontend/src/components/NotificationCenter.module.css) (สร้างใหม่)
+ - [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) (สร้างใหม่: สไตล์เฉพาะสำหรับ Admin Navbar)
+ - [`Softdev_Frontend/src/components/NotificationCenter.module.css`](Softdev_Frontend/src/components/NotificationCenter.module.css) (สร้างใหม่: สไตล์สำหรับ Notification Center)
  - [`Softdev_Frontend/src/utils/imageUtils.js`](Softdev_Frontend/src/utils/imageUtils.js) (สร้างใหม่: ฟังก์ชันสำหรับบีบอัดรูปภาพและจัดการขนาดไฟล์)
  
  ### แก้ไข
  - [`Softdev_Frontend/index.html`](Softdev_Frontend/index.html):
      - เปลี่ยน `<title>` เป็น "Report Application"
      - เปลี่ยน favicon ให้ชี้ไปที่ `/favicon.png`
+ - [`Softdev_Frontend/package.json`](Softdev_Frontend/package.json):
+     - เพิ่ม `recharts` และ `lucide-react` เป็น dependency
+ - [`Softdev_Frontend/README.md`](Softdev_Frontend/README.md):
+     - อัปเดตโครงสร้าง Frontend และเพิ่มข้อมูลระบบบีบอัดรูปภาพ
  - [`Softdev_Frontend/src/App.jsx`](Softdev_Frontend/src/App.jsx):
      - เพิ่ม route สำหรับหน้า MyReports
      - เพิ่ม route สำหรับหน้า `/requests/:id/update-progress`
      - เพิ่ม route สำหรับหน้า `/requests/:id/cost-logging`
      - เพิ่ม route สำหรับหน้า `/requests/:id/close-job`
+ - [`Softdev_Frontend/src/components/Layout.jsx`](Softdev_Frontend/src/components/Layout.jsx):
+     - เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Navbar.jsx`
+     - เพิ่ม `Link` component ใน import จาก `react-router-dom` (แก้ปัญหา crash)
+     - ปรับปรุงการรับค่า `items` ใน `NotificationCenter` ให้รองรับค่า `undefined` (แก้ปัญหา crash)
+ - [`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx):
+     - แก้ไขปุ่มระฆังให้อยู่ตรงกลางแนวตั้ง
+     - เพิ่มปุ่ม "ออกจากระบบ" (outline สีแดง) และ logic signOut + ลบ token + navigate "/"
+     - เปลี่ยนไปใช้ `Bell` icon จาก `lucide-react` แทน SVG ดิบ (แก้ปัญหา icon ไม่แสดง)
  - [`Softdev_Frontend/src/components/RepairCard.jsx`](Softdev_Frontend/src/components/RepairCard.jsx): เพิ่มสถานะ `cancelled` และอัปเดต `statusMap`
  - [`Softdev_Frontend/src/components/RepairCard.module.css`](Softdev_Frontend/src/components/RepairCard.module.css): เพิ่ม style สำหรับสถานะ `cancelled`
  - [`Softdev_Frontend/src/components/UserNavbar.jsx`](Softdev_Frontend/src/components/UserNavbar.jsx):
@@ -62,7 +74,7 @@
      - ปรับปรุงการแสดงผล dropdown สถานะงานให้มีตัวเลือกที่แน่นอนและเป็นภาษาไทย
      - ปรับปรุงการแสดงผล checklist item ให้มีระยะห่างที่ถูกต้อง
      - เพิ่มระบบอัปโหลดรูปภาพพร้อม preview สำหรับรูปภาพหลังการซ่อม
-     - **เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB**
+     - เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB (ใช้ `imageUtils.js`)
      - ปรับปรุง Header section ให้ใช้ style เดียวกับหน้า Admin อื่นๆ (background image และ text color)
      - เพิ่มปุ่มนำทางไปยังหน้าบันทึกค่าใช้จ่าย (`CostLogging`)
      - เพิ่มปุ่มนำทางไปยังหน้าปิดงานซ่อม (`CloseJob`)
@@ -71,27 +83,20 @@
      - ปรับปรุง style สำหรับ `.historyDot` ให้มี padding และสีตามสถานะที่ถูกต้อง
      - ลบ style ของ `.header` ที่ไม่ใช้แล้วออก
      - เพิ่ม style สำหรับปุ่ม `costButton` และ `closeJobButton`
-     - **เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)**
+     - เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)
  - [`Softdev_Frontend/src/pages/user/ReportPage.jsx`](Softdev_Frontend/src/pages/user/ReportPage.jsx):
     - เพิ่มการ validate ประเภทไฟล์รูปภาพที่อัปโหลดได้ (.jpg, .jpeg, .png, .gif, .webp)
-    - **เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB**
+    - เพิ่มระบบบีบอัดรูปภาพอัตโนมัติและจำกัดขนาดไฟล์เป็น 10MB (ใช้ `imageUtils.js`)
     - เพิ่มระบบเลือกอุปกรณ์แบบ Cascading Dropdown 3 ขั้นตอน (ห้อง/สถานที่, ประเภทอุปกรณ์, อุปกรณ์)
     - ดึงข้อมูล locations, asset_categories, assets จาก Supabase จริง
     - เปลี่ยนช่อง "รายละเอียด" (description) จาก required → optional
  - [`Softdev_Frontend/src/pages/user/ReportPage.module.css`](Softdev_Frontend/src/pages/user/ReportPage.module.css):
-    - **เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)**
- - [`Softdev_Frontend/data/mock.js`](Softdev_Frontend/data/mock.js):
-    - เพิ่มฟังก์ชัน `addRepairCost` สำหรับบันทึกค่าใช้จ่ายลงในหน่วยความจำจำลอง
-    - เพิ่มฟังก์ชัน `updateReportStatus` สำหรับอัปเดตสถานะคำขอและเวลาปิดงาน
+    - เพิ่มสไตล์สำหรับระบบบีบอัดรูปภาพ (loadingOverlay, fileInfo)
  - [`Softdev_Frontend/src/styles.css`](Softdev_Frontend/src/styles.css):
     - เพิ่ม Style สำหรับ Chart Grid และ Chart Cards ใน Admin Dashboard
-    - ลบ `.icon-btn`, `.bell-btn`, `.bell-badge` ออก และย้ายไปไว้ใน [`Softdev_Frontend/src/components/Navbar.module.css`](Softdev_Frontend/src/components/Navbar.module.css) แทน
- - [`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx):
-     - แก้ไขปุ่มระฆังให้อยู่ตรงกลางแนวตั้ง (แก้ไขสไตล์ `.notificationBtn`)
-     - เพิ่มปุ่ม "ออกจากระบบ" (outline สีแดง) และ logic signOut + ลบ token + navigate "/"
- - [`Softdev_Frontend/src/components/Layout.jsx`](Softdev_Frontend/src/components/Layout.jsx):
-     - แก้ไขปุ่มปิด X ใน Notification Center (เปลี่ยน `className` จาก `nc-close` เป็น `styles.closeBtn`)
-
+    - ปรับปรุง style สำหรับ `.bell-btn` และ `.bell-badge` ใน Admin Navbar (แก้ปัญหา icon ไม่แสดงและตำแหน่ง badge)
+ - `.env.example` และ `package-lock.json`: จัดการไฟล์ build ที่เกี่ยวข้อง (ลบ `.env.example`, แก้ไข `package-lock.json`)
+ 
  ## API Endpoints ที่ใช้
  - `GET /Auth/me`: สำหรับตรวจสอบ Role ของผู้ใช้หลัง Login
  - `GET /Notification/MyNotifications`: สำหรับดึงรายการแจ้งเตือนของผู้ใช้
@@ -127,7 +132,12 @@
  ### `Navbar` ([`Softdev_Frontend/src/components/Navbar.jsx`](Softdev_Frontend/src/components/Navbar.jsx))
  - **หน้าที่:** แถบนำทางสำหรับผู้ดูแลระบบ (Admin), แสดงโลโก้, Breadcrumb, ปุ่มแจ้งเตือน (bell icon) พร้อม Badge แสดงจำนวนที่ยังไม่อ่าน และข้อมูลผู้ใช้/ปุ่ม Sign out
  - **การใช้งาน:** นำมาใช้ใน `Layout.jsx`
- - **การปรับปรุง:** เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Layout.jsx`, ปรับปรุงการแสดงผล Bell Icon และ Badge, **แก้ไขปุ่มระฆัง Admin Navbar ให้อยู่ตรงกลางแนวตั้ง, เพิ่มปุ่มออกจากระบบ Admin Navbar**
+ - **การปรับปรุง:** เชื่อมต่อ state การเปิด/ปิด Notification Center กับ `Layout.jsx`, ปรับปรุงการแสดงผล Bell Icon และ Badge, **แก้ไขปุ่มระฆัง Admin Navbar ให้อยู่ตรงกลางแนวตั้ง, เพิ่มปุ่มออกจากระบบ Admin Navbar, เปลี่ยนไปใช้ `Bell` icon จาก `lucide-react` (แก้ปัญหา icon ไม่แสดง)**
+ 
+ ### `NotificationCenter` ([`Softdev_Frontend/src/components/NotificationCenter.jsx`](Softdev_Frontend/src/components/NotificationCenter.jsx))
+ - **หน้าที่:** Modal แสดงรายการแจ้งเตือนสำหรับผู้ดูแลระบบ, ถูกเปิดโดย `Navbar` ใน `Layout.jsx`
+ - **การใช้งาน:** ถูก render แบบมีเงื่อนไขใน `Layout.jsx`
+ - **การพัฒนา:** จัดการ Tab แสดงผลตามสถานะ, แสดงรายละเอียดแจ้งเตือนพร้อมลิงก์ไปยังคำขอที่เกี่ยวข้อง
  
  ## สิ่งที่ยังไม่ได้ทำ (TODO)
  - Backend Admin API ยังไม่มี (ปัจจุบันใช้ mock data อยู่)
@@ -135,11 +145,6 @@
  - หน้า Admin จัดการ User (ยังไม่มีการพัฒนา)
  - หน้า Admin ข้อมูลครุภัณฑ์ (ยังไม่มีการพัฒนา)
  - การสร้างหน้า Admin ใหม่ๆ จะต้องมีการเชื่อมต่อกับ Backend API จริง (ปัจจุบันใช้ mock data)
- - ✅ แก้ไขปุ่มระฆัง Admin Navbar
- - ✅ เพิ่มปุ่มออกจากระบบ Admin Navbar
- - ✅ หน้า CostLogging
- - ✅ หน้า CloseJob
- - ✅ **ระบบบีบอัดและจำกัดขนาดรูปภาพ (10MB)**
  
  ## ข้อควรระวัง
  - ห้ามยุ่งเกี่ยวกับโฟลเดอร์ `PSDP_Project` (เป็นส่วนของ Backend)
@@ -172,12 +177,12 @@
  │   │   ├── Footer.jsx
  │   │   ├── Layout.jsx      # Global Layout with Navbar/Footer
  │   │   ├── Navbar.jsx      # Admin Navbar
+ │   │   ├── Navbar.module.css # NEW: Admin Navbar specific styles
+ │   │   ├── NotificationCenter.module.css # NEW: Notification Center specific styles
  │   │   ├── NotificationPopup.jsx
  │   │   ├── RepairCard.jsx  # Summary card for reports
  │   │   ├── UI.jsx          # Primitive UI elements (Pill, Card)
  │   │   └── UserNavbar.jsx  # User-specific Navbar
- │   │   ├── Navbar.module.css # NEW: Admin Navbar specific styles
- │   │   └── NotificationCenter.module.css # NEW: Notification Center specific styles
  │   ├── pages/
  │   │   ├── admin/          # Administrative interfaces
  │   │   │   ├── AdminDashboard.jsx
@@ -207,12 +212,14 @@
  ```
  PSDP_Project/
  ├── Controllers/            # API Endpoints
- │   ├── AdminController.cs
- │   ├── AssetController.cs
+ │   ├── AdminAssetController.cs # NEW: Controller for admin asset management
+ │   ├── AdminDashboardController.cs # NEW: Controller for admin dashboard data
+ │   ├── AdminManageController.cs # NEW: Controller for admin request management
  │   ├── AuthController.cs
  │   ├── HomeController.cs
  │   ├── NotificationController.cs
- │   └── ReportController.cs
+ │   ├── ReportController.cs
+ │   └── UserDashboardController.cs # NEW: Controller for user dashboard data
  ├── Data/
  │   └── MyDbContext.cs      # EF Core Database Context
  ├── Models/                 # Database Schema & Data Transfer Objects
@@ -243,6 +250,9 @@
  | `src/pages/admin/CloseJob.jsx` | Job Completion Summary | `CloseJob` | None | Mock Data | ✅ Completed |
  | `src/components/UserNavbar.jsx` | Nav for Users | `UserNavbar` | `userName`, `unreadCount` | Supabase & API | ✅ Completed |
  | `src/pages/user/Login.jsx` | User Authentication | `Login` | `email`, `password` | API (`/Auth/me`) | ✅ Completed |
+ | `src/components/Navbar.jsx` | Admin Navbar | `Navbar` | `setNcOpen`, `notifs` (props) | Mock Data | ✅ Completed |
+ | `src/components/NotificationCenter.jsx` | Notification Modal | `NotificationCenter` | `tab`, `filtered` | Mock Data | ✅ Completed |
+ | `src/utils/imageUtils.js` | Image Compression Utility | `compressImage` | N/A | N/A | ✅ Completed |
  | `data/mock.js` | Mock Data Store | `reports`, `users`, `locations`, etc. | N/A | N/A | ⚠️ Mock |
  
  ---
@@ -288,6 +298,7 @@
  |-----------|-------|---------|--------|
  | `RepairCard` | `id`, `title`, `status`, `date`, `img` | Display report summaries | ✅ Completed |
  | `NotificationPopup` | `onClose`, `setUnreadCount` | Notification dropdown logic | ✅ Completed |
+ | `NotificationCenter` | `open`, `onClose`, `items`, `markRead` | Admin Notification Modal | ✅ Completed |
  | `Pill` | `tone` (ok, warn, progress, bad, muted), `children` | Status badges | ✅ Completed |
  | `Card` | `children`, `className` | Container for sections | ✅ Completed |
  
@@ -299,14 +310,12 @@
  - User Authentication (Login/Register) with Backend Integration.
  - User-side reporting flow with cascading dropdowns (Supabase integrated).
  - Image upload validation and preview.
+ - **Image compression and size limit (10MB)**
  - Application routing and global layout structures.
  - Admin UI pages: Dashboard, List, Detail, Update Progress, Cost Logging, and Close Job.
  - Inter-page navigation for Admin repair workflow.
- - **แก้ไขปุ่มระฆัง Admin Navbar**
- - **เพิ่มปุ่มออกจากระบบ Admin Navbar**
- - **หน้า CostLogging**
- - **หน้า CloseJob**
- - **ระบบบีบอัดและจำกัดขนาดรูปภาพ (10MB)**
+ - **Admin Navbar: Bell icon display, position, and logout button functionality**
+ - **Admin Dashboard: "Reports by Location" Bar Chart, "Status Overview" Donut Chart, "Monthly Reports" Bar Chart, and responsive 3-column layout.**
  
  #### 🔄 IN PROGRESS
  - **Admin Data Migration:** Moving admin pages from using `mock.js` to fetching from the `.NET` API.
