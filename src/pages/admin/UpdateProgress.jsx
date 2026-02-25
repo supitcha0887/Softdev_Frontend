@@ -13,11 +13,11 @@ const CategoryIcon = () => '🏷️';
 const DocIcon = () => '📄';
 
 const CHECKLIST_ITEMS = [
-    "ตรวจสอบเบื้องต้น",
-    "ตรวจสอบระบบไฟฟ้า",
-    "เปลี่ยนชิ้นส่วนที่ชำรุด",
-    "ทดสอบการทำงาน",
-    "ทำความสะอาดและปิดงาน"
+    "ตรวจสอบอาการเบื้องต้น (Initial inspection)",
+    "ตรวจสอบระบบไฟฟ้า (Check electrical system)",
+    "เปลี่ยนชิ้นส่วนที่ชำรุด (Replace damaged parts)",
+    "ทดสอบการทำงาน (Test functionality)",
+    "ทำความสะอาดและปิดงาน (Clean up and close)"
 ];
 
 const STATUS_TH = {
@@ -45,11 +45,17 @@ export default function UpdateProgress() {
     
     const report = useMemo(() => mockReports.find(r => r.id === id), [id]);
 
-    const [status, setStatus] = useState(report?.status || '');
+    const [status, setStatus] = useState(report?.status || 'in_progress');
     const [workNotes, setWorkNotes] = useState('');
+    
+    // Checklist state
     const [checkedState, setCheckedState] = useState(
         new Array(CHECKLIST_ITEMS.length).fill(false)
     );
+    const [isOtherChecked, setIsOtherChecked] = useState(false);
+    const [otherChecklistItem, setOtherChecklistItem] = useState('');
+
+    // History and Image state
     const [progressHistory, setProgressHistory] = useState(report?.progress || []);
     const [imagePreview, setImagePreview] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -63,6 +69,13 @@ export default function UpdateProgress() {
             index === position ? !item : item
         );
         setCheckedState(updatedCheckedState);
+    };
+
+    const handleOtherCheckChange = (e) => {
+        setIsOtherChecked(e.target.checked);
+        if (!e.target.checked) {
+            setOtherChecklistItem(''); // Clear text if unchecked
+        }
     };
     
     const handleImageChange = async (e) => {
@@ -82,7 +95,6 @@ export default function UpdateProgress() {
             return;
         }
 
-        // 1. Check original file size limit
         if (file.size > 10 * 1024 * 1024) {
             alert("ขนาดไฟล์ต้องไม่เกิน 10 MB กรุณาเลือกรูปใหม่");
             e.target.value = null;
@@ -101,10 +113,6 @@ export default function UpdateProgress() {
         } catch (error) {
             console.error("Image compression failed:", error);
             alert("เกิดข้อผิดพลาดในการบีบอัดรูปภาพ");
-            setImageFile(null);
-            setImagePreview(null);
-            setOriginalFileSize(null);
-            setCompressedFileSize(null);
         } finally {
             setIsCompressing(false);
         }
@@ -112,28 +120,36 @@ export default function UpdateProgress() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
         
+        let checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
+        if (isOtherChecked && otherChecklistItem.trim() !== '') {
+            checkedItems.push(otherChecklistItem.trim());
+        }
+
         const newProgress = {
             date: new Date().toISOString(),
             title: STATUS_TH[status] || "อัปเดตสถานะ",
             description: workNotes,
             by: "STAFF-0024", // Mock staff
-            checklist: checkedItems,
+            checklist: status === 'in_progress' ? checkedItems : [],
             status: status,
         };
 
         setProgressHistory(prev => [...prev, newProgress]);
-
+        console.log("Updating main report status to:", status);
+        
         // Reset form
         setWorkNotes('');
         setCheckedState(new Array(CHECKLIST_ITEMS.length).fill(false));
+        setIsOtherChecked(false);
+        setOtherChecklistItem('');
         setImageFile(null);
         setImagePreview(null);
         setOriginalFileSize(null);
         setCompressedFileSize(null);
+        if(fileInputRef.current) fileInputRef.current.value = "";
         
-        alert('อัปเดตความคืบหน้าสำเร็จ!');
+        alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
     };
 
     if (!report) {
@@ -144,7 +160,6 @@ export default function UpdateProgress() {
         );
     }
     
-    // This is just for demonstration, you might get this from your status map
     const statusTone = (status) => {
         const tones = {
             "pending": 'warn',
@@ -154,6 +169,148 @@ export default function UpdateProgress() {
             "approved": 'new',
         };
         return tones[status] || 'default';
+    }
+    
+    // --- Render functions for dynamic form ---
+
+    const renderFormContent = () => {
+        switch (status) {
+            case 'in_progress':
+                return (
+                    <>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="work-notes">บันทึกการทำงาน / Work Notes</label>
+                            <textarea 
+                                id="work-notes" 
+                                rows="5" 
+                                value={workNotes} 
+                                onChange={e => setWorkNotes(e.target.value)}
+                                placeholder="บันทึกรายละเอียดการทำงาน เช่น ตรวจสอบแล้วพบว่า..."
+                                required 
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>ขั้นตอนการซ่อม / Repair Checklist</label>
+                            <div className={styles.checklist}>
+                                {CHECKLIST_ITEMS.map((name, index) => (
+                                    <label key={index} className={styles.checkItem}>
+                                        <input
+                                            type="checkbox"
+                                            checked={checkedState[index]}
+                                            onChange={() => handleChecklistChange(index)}
+                                        />
+                                        {name}
+                                    </label>
+                                ))}
+                                <label className={styles.checkItem}>
+                                    <input
+                                        type="checkbox"
+                                        checked={isOtherChecked}
+                                        onChange={handleOtherCheckChange}
+                                    />
+                                    อื่นๆ
+                                </label>
+                                {isOtherChecked && (
+                                    <input
+                                        type="text"
+                                        className={styles.otherInput}
+                                        placeholder="กรอกรายละเอียดขั้นตอนอื่นๆ"
+                                        value={otherChecklistItem}
+                                        onChange={e => setOtherChecklistItem(e.target.value)}
+                                        required
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </>
+                );
+            case 'completed':
+                return (
+                    <>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="work-notes">บันทึกรายละเอียดการทำงาน / Work Notes (Optional)</label>
+                            <textarea 
+                                id="work-notes" 
+                                rows="5" 
+                                value={workNotes} 
+                                onChange={e => setWorkNotes(e.target.value)}
+                                placeholder="บันทึกรายละเอียดการทำงาน เช่น ตรวจสอบแล้วพบว่า..."
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="attach-photos">แนบรูปภาพ (ถ้ามี) / Attach Photos - Optional</label>
+                            <div className={styles.uploadBox} onClick={() => fileInputRef.current.click()}>
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', borderRadius: '8px' }}/>
+                                ) : (
+                                    'คลิกเพื่ออัปโหลดรูปภาพ หรือลากไฟล์มาวางที่นี่'
+                                )}
+                                {isCompressing && (
+                                    <div className={styles.loadingOverlay}>
+                                        <span>กำลังย่อขนาดรูปภาพ...</span>
+                                    </div>
+                                )}
+                            </div>
+                            {originalFileSize && (
+                                <p className={styles.fileInfo}>
+                                    ขนาดไฟล์: {originalFileSize} {compressedFileSize && `→ ${compressedFileSize}`}
+                                </p>
+                            )}
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                id="attach-photos" 
+                                style={{ display: 'none' }} 
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                    </>
+                );
+            case 'cancelled':
+                return (
+                    <div className={styles.formGroup}>
+                        <label htmlFor="work-notes">เหตุผลการยกเลิก / Reason for Cancellation (Optional)</label>
+                        <textarea 
+                            id="work-notes" 
+                            rows="5" 
+                            value={workNotes} 
+                            onChange={e => setWorkNotes(e.target.value)}
+                            placeholder="ระบุเหตุผลที่ยกเลิกงานซ่อมนี้..."
+                        />
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    const renderButtons = () => {
+        switch (status) {
+            case 'in_progress':
+                return (
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.saveButton}>บันทึกการอัปเดต</button>
+                        <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
+                    </div>
+                );
+            case 'completed':
+                return (
+                    <div className={styles.buttonGroup}>
+                        <button type="button" className={styles.saveButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>บันทึกการใช้จ่าย และปิดงาน</button>
+                        <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
+                    </div>
+                );
+            case 'cancelled':
+                return (
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.cancelConfirmButton}>ยืนยันการยกเลิก</button>
+                        <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
+                    </div>
+                );
+            default:
+                return null;
+        }
     }
     
     return (
@@ -194,59 +351,11 @@ export default function UpdateProgress() {
                                     <option value="cancelled">ยกเลิก</option>
                                 </select>
                             </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="work-notes">บันทึกการทำงาน</label>
-                                <textarea id="work-notes" rows="5" value={workNotes} onChange={e => setWorkNotes(e.target.value)}></textarea>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>ขั้นตอนการซ่อม</label>
-                                <div className={styles.checklist}>
-                                    {CHECKLIST_ITEMS.map((name, index) => (
-                                        <label key={index} className={styles.checkItem}>
-                                            <input
-                                                type="checkbox"
-                                                checked={checkedState[index]}
-                                                onChange={() => handleChecklistChange(index)}
-                                            />
-                                            {name}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="attach-photos">แนบรูปภาพ (ท้ายงาน)</label>
-                                <div className={styles.uploadBox} onClick={() => fileInputRef.current.click()}>
-                                    {imagePreview ? (
-                                        <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', borderRadius: '8px' }}/>
-                                    ) : (
-                                        'คลิกเพื่ออัปโหลดรูปภาพ'
-                                    )}
-                                    {isCompressing && (
-                                        <div className={styles.loadingOverlay}>
-                                            <span>กำลังย่อขนาดรูปภาพ...</span>
-                                        </div>
-                                    )}
-                                </div>
-                                {originalFileSize && (
-                                    <p className={styles.fileInfo}>
-                                        ขนาดไฟล์: {originalFileSize} {compressedFileSize && `→ ${compressedFileSize}`}
-                                    </p>
-                                )}
-                                <input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    id="attach-photos" 
-                                    style={{ display: 'none' }} 
-                                    accept="image/jpeg,image/png,image/gif,image/webp"
-                                    onChange={handleImageChange}
-                                />
-                            </div>
-                            <div className={styles.buttonGroup}>
-                                <button type="submit" className={styles.saveButton} disabled={isCompressing}>บันทึกการอัปเดต</button>
-                                <button type="button" className={styles.costButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>บันทึกค่าใช้จ่าย</button>
-                                <button type="button" className={styles.closeJobButton} onClick={() => navigate(`/requests/${id}/close-job`)}>ปิดงานซ่อม</button>
-                                <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>ย้อนกลับ</button>
-                            </div>
+                            
+                            {renderFormContent()}
+                            
+                            {renderButtons()}
+
                         </form>
                     </Card>
                 </section>
@@ -263,6 +372,14 @@ export default function UpdateProgress() {
                                     <h3 className={styles.historyTitle}>{STATUS_TH[item.status] || item.title}</h3>
                                     <p className={styles.historyDesc}>{item.description}</p>
                                     <p className={styles.historyBy}>โดย: {item.by}</p>
+                                    {item.checklist && item.checklist.length > 0 && (
+                                        <div className={styles.historyChecklist}>
+                                            <strong>ขั้นตอนที่ทำ:</strong>
+                                            <ul>
+                                                {item.checklist.map((check, i) => <li key={i}>{check}</li>)}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
