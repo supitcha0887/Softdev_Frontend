@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card } from "../../components/UI";
 import { reports as mockReports, addRepairCost } from "../../../data/mock";
 import styles from "./CostLogging.module.css";
@@ -34,6 +34,7 @@ const EmptyIcon = () => (
 
 export default function CostLogging() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const report = useMemo(() => mockReports.find((r) => r.id === id), [id]);
 
   const [costItems, setCostItems] = useState([]);
@@ -85,18 +86,18 @@ export default function CostLogging() {
     setCostItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  const handleSaveAndAttach = () => {
-    if (costItems.length === 0) {
-        alert("There are no cost items to save.");
-        return;
+  const handleSaveAndContinue = () => {
+    // If there are items, save them
+    if (costItems.length > 0) {
+        // In a real app, this would be a single API call.
+        costItems.forEach(item => {
+            addRepairCost(id, item);
+        });
+        alert(`Successfully saved ${costItems.length} cost items.`);
+        setCostItems([]); // Clear the list after saving
     }
-    // In a real app, this would be a single API call.
-    // Here, we add each item to the mock data.
-    costItems.forEach(item => {
-        addRepairCost(id, item);
-    });
-    alert(`Successfully saved ${costItems.length} cost items.`);
-    setCostItems([]); // Clear the list after saving
+    // Always navigate to the next step
+    navigate(`/requests/${id}/close-job`);
   };
 
   const newItemTotalPrice = (parseFloat(newItem.quantity) || 0) * (parseFloat(newItem.unit_price) || 0);
@@ -261,9 +262,9 @@ export default function CostLogging() {
                     <span>THB</span>
                 </div>
             </div>
-            <button className={styles.saveBtn} onClick={handleSaveAndAttach}>
-                บันทึกและแนบกับคำขอ
-                <span>Save & Attach to Request</span>
+            <button className={styles.saveBtn} onClick={handleSaveAndContinue}>
+                บันทึกและดำเนินการต่อ
+                <span>Save and Continue</span>
             </button>
         </Card>
       </main>
