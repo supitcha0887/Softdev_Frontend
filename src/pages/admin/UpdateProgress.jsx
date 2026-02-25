@@ -45,7 +45,11 @@ export default function UpdateProgress() {
     
     const report = useMemo(() => mockReports.find(r => r.id === id), [id]);
 
-    const [status, setStatus] = useState(report?.status || 'in_progress');
+    const [status, setStatus] = useState(() => {
+        const validStatuses = ['in_progress', 'completed', 'cancelled'];
+        const reportStatus = report?.status;
+        return validStatuses.includes(reportStatus) ? reportStatus : 'in_progress';
+    });
     const [workNotes, setWorkNotes] = useState('');
     
     // Checklist state
