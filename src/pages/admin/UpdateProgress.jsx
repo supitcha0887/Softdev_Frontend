@@ -189,8 +189,6 @@ export default function UpdateProgress() {
                             <div className={styles.formGroup}>
                                 <label htmlFor="work-status">สถานะงาน</label>
                                 <select id="work-status" value={status} onChange={e => setStatus(e.target.value)}>
-                                    <option value="pending">รอรับงาน</option>
-                                    <option value="approved">อนุมัติแล้ว</option>
                                     <option value="in_progress">กำลังดำเนินการ</option>
                                     <option value="completed">เสร็จสิ้น</option>
                                     <option value="cancelled">ยกเลิก</option>
