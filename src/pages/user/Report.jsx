@@ -132,18 +132,21 @@ function Report() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [repairItems, setRepairItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     pending: false,
     in_progress: false,
     completed: false,
   });
 
-  // กรอง items ตาม checkbox ที่เลือก — ถ้าไม่ได้เลือกเลยให้แสดงทั้งหมด
+  // กรอง items ตาม checkbox สถานะ + search query
   const activeFilters = Object.keys(filters).filter((k) => filters[k]);
-  const filteredItems =
-    activeFilters.length === 0
-      ? repairItems
-      : repairItems.filter((item) => activeFilters.includes(item.status));
+  const filteredItems = repairItems.filter((item) => {
+    const matchStatus = activeFilters.length === 0 || activeFilters.includes(item.status);
+    const matchSearch =
+      searchQuery === "" || item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchStatus && matchSearch;
+  });
 
   const toggleFilter = (key) => {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -235,7 +238,7 @@ function Report() {
 
   return (
     <div className={styles.container}>
-      <UserNavbar />
+      <UserNavbar onSearch={(q) => setSearchQuery(q)} />
 
       {/* HERO */}
       <div className={styles.hero} style={{ backgroundImage: `url(${bg})` }}>
@@ -292,7 +295,7 @@ function Report() {
               <div className={styles.grid}>
                 {filteredItems.length === 0 ? (
                   <p style={{ color: "#888", marginTop: "20px" }}>
-                    ไม่พบรายการที่ตรงกับตัวกรองที่เลือก
+                    {searchQuery ? `ไม่พบรายการที่มีชื่อ "${searchQuery}"` : "ไม่พบรายการที่ตรงกับตัวกรองที่เลือก"}
                   </p>
                 ) : (
                   filteredItems.map((item) => (

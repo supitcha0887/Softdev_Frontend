@@ -1,0 +1,46 @@
+.actionBox {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* 12px */
+}
+
+.actionBtn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.acceptBtn {
+    background-color: #D32F2F; /* Red */
+    color: white;
+}
+
+.acceptBtn:hover {
+    background-color: #B71C1C;
+}
+
+.cancelBtn {
+    background-color: #F57C00; /* Orange */
+    color: white;
+}
+
+.cancelBtn:hover {
+    background-color: #E65100;
+}
+
+.updateBtn {
+    background-color: #D32F2F; /* Red */
+    color: white;
+}
+
+.updateBtn:hover {
+    background-color: #B71C1C;
+}
