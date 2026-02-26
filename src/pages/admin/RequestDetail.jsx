@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
-import { reports as mockReports, STATUS, statusTone } from "../../../data/mock.js";
+import { reports as mockReports, STATUS, statusTone, STATUS_DISPLAY } from "../../../data/mock.js";
 import styles from "./RequestDetail.module.css";
 import inprogress from "../../assets/inprogress.svg";
 import complete from "../../assets/complete.png";
@@ -37,12 +37,12 @@ export default function RequestDetail() {
   // --- Action Handlers ---
   const handleAcceptJob = () => {
     // TODO: API call to update status to 'in_progress'
-    setReport({ ...report, status: STATUS.PROGRESS, assigned: "STAFF-0024" });
+    setReport({ ...report, status: STATUS.IN_PROGRESS, assigned: "STAFF-0024" });
   };
 
   const handleCancelJob = () => {
     // TODO: API call to update status to 'cancelled'
-    setReport({ ...report, status: STATUS.CANCELED, assigned: "Unassigned" });
+    setReport({ ...report, status: STATUS.CANCELLED, assigned: "Unassigned" });
   };
 
   const handleUpdateProgress = () => {
@@ -63,7 +63,7 @@ export default function RequestDetail() {
             </button>
           </div>
         );
-      case STATUS.PROGRESS:
+      case STATUS.IN_PROGRESS:
         return (
           <div className={styles.actionBox}>
             <button type="button" onClick={handleUpdateProgress} className={`${styles.actionBtn} ${styles.updateBtn}`}>
@@ -85,24 +85,17 @@ export default function RequestDetail() {
       tone: "ok",
     },
     {
-      key: "accepted",
-      labelTH: "รับงาน",
-      labelEN: "Accepted",
-      on: report.assigned !== "Unassigned",
-      tone: "warn",
-    },
-    {
       key: "progress",
       labelTH: "ดำเนินการ",
       labelEN: "In Progress",
-      on: report.status === STATUS.PROGRESS || report.status === STATUS.DONE,
+      on: report.status === STATUS.IN_PROGRESS || report.status === STATUS.COMPLETED,
       tone: "progress",
     },
     {
       key: "done",
       labelTH: "เสร็จสิ้น",
       labelEN: "Completed",
-      on: report.status === STATUS.DONE,
+      on: report.status === STATUS.COMPLETED,
       tone: "ok",
     },
   ];
@@ -138,7 +131,7 @@ export default function RequestDetail() {
             <div className="section-title">สถานะปัจจุบัน / Current Status</div>
             <div className="kv">
               <div className="muted">สถานะ / Status</div>
-              <Pill tone={statusTone(report.status)}>{report.status}</Pill>
+              <Pill tone={statusTone(report.status)}>{STATUS_DISPLAY[report.status] || report.status}</Pill>
             </div>
             <div className="kv">
               <div className="muted">ผู้รับผิดชอบ / Assigned</div>
