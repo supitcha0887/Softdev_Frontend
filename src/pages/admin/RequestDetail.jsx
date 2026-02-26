@@ -135,8 +135,22 @@ export default function RequestDetail() {
             </div>
             <div className="kv">
               <div className="muted">ผู้รับผิดชอบ / Assigned</div>
-              <div className="kv-val">{report.assigned}</div>
+              <div className="kv-val">{assigned}</div>
             </div>
+
+            {/* <div style={{ marginTop: 10 }}>
+              <select
+                value={currentStatus}
+                onChange={(e) => setCurrentStatus(e.target.value)}
+                aria-label="change status"
+                style={{ width: "100%" }}
+              >
+                <option value={STATUS.PENDING}>{STATUS.PENDING}</option>
+                <option value={STATUS.PROGRESS}>{STATUS.PROGRESS}</option>
+                <option value={STATUS.DONE}>{STATUS.DONE}</option>
+                <option value={STATUS.CANCELED}>{STATUS.CANCELED}</option>
+              </select>
+            </div> */}
           </Card>
         </div>
 

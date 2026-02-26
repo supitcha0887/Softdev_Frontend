@@ -28,7 +28,7 @@ export default function Navbar({ setNcOpen, notifs }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <Link to="/" className="brand">
+        <Link to="/dashboard" className="brand">
           <div className="brand-badge">
               <img src={svg} alt="Repair Logo" />
           </div>
@@ -41,7 +41,7 @@ export default function Navbar({ setNcOpen, notifs }) {
 
       <div className="topbar-right">
         <nav className="crumbs" aria-label="breadcrumb">
-              <Link to="/" className={`crumb-link ${!isList ? "active" : ""}`}>หน้าแรก / Home</Link>
+              <Link to="/dashboard" className={`crumb-link ${!isList ? "active" : ""}`}>หน้าแรก / Home</Link>
               <Link to="/requests" className={`crumb-link ${isList ? "active" : ""}`}>รายการแจ้งซ่อม / List</Link>
               </nav>
 
