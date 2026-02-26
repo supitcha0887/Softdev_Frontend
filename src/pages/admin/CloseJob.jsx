@@ -190,8 +190,11 @@ export default function CloseJob() {
             <button className={styles.confirmBtn} onClick={handleConfirmClose}>
               ยืนยันปิดงาน / Mark as Completed
             </button>
-            <button className={styles.editBtn} onClick={() => navigate(`/requests/${id}/update-progress`)}>
+            <button className={styles.outlineBtn} onClick={() => navigate(`/requests/${id}/update-progress`)}>
               แก้ไขข้อมูล / Edit Details
+            </button>
+            <button className={styles.outlineBtn} onClick={() => navigate(`/requests/${id}/cost-logging`)}>
+              แก้ไขค่าใช้จ่าย / Edit Cost
             </button>
           </div>
 

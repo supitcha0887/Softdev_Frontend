@@ -33,7 +33,6 @@ export default function AdminDashboard() {
   const statusData = useMemo(() => {
     const counts = {
       [STATUS.PENDING]: { name: "รอรับงาน", value: 0, color: "#f59e0b" },
-      [STATUS.APPROVED]: { name: "อนุมัติ", value: 0, color: "#3b82f6" },
       [STATUS.IN_PROGRESS]: { name: "กำลังซ่อม", value: 0, color: "#8b5cf6" },
       [STATUS.COMPLETED]: { name: "เสร็จสิ้น", value: 0, color: "#10b981" },
       [STATUS.CANCELLED]: { name: "ยกเลิก", value: 0, color: "#6b7280" },

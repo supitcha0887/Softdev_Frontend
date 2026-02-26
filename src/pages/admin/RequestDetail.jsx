@@ -1,20 +1,22 @@
 import React, { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
-import { reports, STATUS, statusTone } from "../../../data/mock.js";
+import { reports as mockReports, STATUS, statusTone, STATUS_DISPLAY } from "../../../data/mock.js";
+import styles from "./RequestDetail.module.css";
 import inprogress from "../../assets/inprogress.svg";
 import complete from "../../assets/complete.png";
 
 export default function RequestDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-    const req = useMemo(() => reports.find((r) => r.id === id), [id]);
-  const [currentStatus, setCurrentStatus] = useState(
-    req?.status ?? STATUS.PENDING,
-  );
-  const [assigned, setAssigned] = useState(req?.assigned ?? "Unassigned");
+  // Find the initial report from mock data
+  const initialReport = useMemo(() => mockReports.find((r) => r.id === id), [id]);
 
-  if (!req) {
+  // Use state to hold the report data, allowing for updates
+  const [report, setReport] = useState(initialReport);
+
+  if (!report) {
     return (
       <main className="container">
         <Card>
@@ -32,16 +34,48 @@ export default function RequestDetail() {
     );
   }
 
-  const acceptJob = () => {
-    setAssigned("STAFF-0024");
-    if (currentStatus === STATUS.NEW) setCurrentStatus(STATUS.PENDING);
+  // --- Action Handlers ---
+  const handleAcceptJob = () => {
+    // TODO: API call to update status to 'in_progress'
+    setReport({ ...report, status: STATUS.IN_PROGRESS, assigned: "STAFF-0024" });
   };
 
-  const cancelJob = () => {
-    setCurrentStatus(STATUS.CANCELED);
-    setAssigned("Unassigned"); // 🔥 reset ให้กลับเทา
+  const handleCancelJob = () => {
+    // TODO: API call to update status to 'cancelled'
+    setReport({ ...report, status: STATUS.CANCELLED, assigned: "Unassigned" });
   };
 
+  const handleUpdateProgress = () => {
+    navigate(`/requests/${report.id}/update-progress`);
+  };
+
+  // --- Conditional Action Buttons ---
+  const renderActions = () => {
+    switch (report.status) {
+      case STATUS.PENDING:
+        return (
+          <div className={styles.actionBox}>
+            <button type="button" onClick={handleAcceptJob} className={`${styles.actionBtn} ${styles.acceptBtn}`}>
+              รับงานซ่อม Accept Job
+            </button>
+            <button type="button" onClick={handleCancelJob} className={`${styles.actionBtn} ${styles.cancelBtn}`}>
+              ยกเลิกงานซ่อม Cancel Job
+            </button>
+          </div>
+        );
+      case STATUS.IN_PROGRESS:
+        return (
+          <div className={styles.actionBox}>
+            <button type="button" onClick={handleUpdateProgress} className={`${styles.actionBtn} ${styles.updateBtn}`}>
+              อัพเดทความคืบหน้างาน Update Progress
+            </button>
+          </div>
+        );
+      default:
+        return <div className="muted">ไม่มีการดำเนินการสำหรับสถานะนี้</div>;
+    }
+  };
+  
   const steps = [
     {
       key: "submitted",
@@ -51,24 +85,17 @@ export default function RequestDetail() {
       tone: "ok",
     },
     {
-      key: "accepted",
-      labelTH: "รับงาน",
-      labelEN: "Accepted",
-      on: assigned !== "Unassigned",
-      tone: "warn",
-    },
-    {
       key: "progress",
       labelTH: "ดำเนินการ",
       labelEN: "In Progress",
-      on: currentStatus === STATUS.PROGRESS || currentStatus === STATUS.DONE,
+      on: report.status === STATUS.IN_PROGRESS || report.status === STATUS.COMPLETED,
       tone: "progress",
     },
     {
       key: "done",
       labelTH: "เสร็จสิ้น",
       labelEN: "Completed",
-      on: currentStatus === STATUS.DONE,
+      on: report.status === STATUS.COMPLETED,
       tone: "ok",
     },
   ];
@@ -78,7 +105,7 @@ export default function RequestDetail() {
       <div className="detail-topbar">
         <div>
           <div className="detail-title">รายละเอียดคำร้อง / Request Detail</div>
-          <div className="muted">คำร้องซ่อมแซมหมายเลข {req.id}</div>
+          <div className="muted">คำร้องซ่อมแซมหมายเลข {report.id}</div>
         </div>
 
         <Link to="/requests" className="back-link">
@@ -90,58 +117,25 @@ export default function RequestDetail() {
         <Card className="detail-main">
           <div className="section-title">รูปภาพปัญหา / Problem Images</div>
           <div className="detail-img">
-            <img src={req.img} alt={req.titleEN} />
+            <img src={report.img} alt={report.titleEN} />
           </div>
         </Card>
 
         <div className="detail-side">
           <Card>
             <div className="section-title">การดำเนินการ / Actions</div>
-            <button className="btn-danger" type="button" onClick={acceptJob}>
-              รับงานซ่อม Accept Job
-            </button>
-            <button className="btn-warn" type="button" onClick={cancelJob}>
-              ยกเลิกงานซ่อม Cancel Job
-            </button>
-            <Link 
-              className="btn-light" 
-              to={`/requests/${id}/cost-logging`} 
-              style={{ display: 'block', marginTop: 10, textAlign: 'center', textDecoration: 'none' }}
-            >
-              บันทึกค่าใช้จ่าย Log Cost
-            </Link>
-            <Link 
-              className="btn-danger" 
-              to={`/requests/${id}/close-job`} 
-              style={{ display: 'block', marginTop: 10, textAlign: 'center', textDecoration: 'none' }}
-            >
-              ปิดงานซ่อม Close Job
-            </Link>
+            {renderActions()}
           </Card>
 
           <Card>
             <div className="section-title">สถานะปัจจุบัน / Current Status</div>
             <div className="kv">
               <div className="muted">สถานะ / Status</div>
-              <Pill tone={statusTone(currentStatus)}>{currentStatus}</Pill>
+              <Pill tone={statusTone(report.status)}>{STATUS_DISPLAY[report.status] || report.status}</Pill>
             </div>
             <div className="kv">
               <div className="muted">ผู้รับผิดชอบ / Assigned</div>
-              <div className="kv-val">{assigned}</div>
-            </div>
-
-            <div style={{ marginTop: 10 }}>
-              <select
-                value={currentStatus}
-                onChange={(e) => setCurrentStatus(e.target.value)}
-                aria-label="change status"
-                style={{ width: "100%" }}
-              >
-                <option value={STATUS.PENDING}>{STATUS.PENDING}</option>
-                <option value={STATUS.PROGRESS}>{STATUS.PROGRESS}</option>
-                <option value={STATUS.DONE}>{STATUS.DONE}</option>
-                <option value={STATUS.CANCELED}>{STATUS.CANCELED}</option>
-              </select>
+              <div className="kv-val">{report.assigned}</div>
             </div>
           </Card>
         </div>
@@ -155,46 +149,46 @@ export default function RequestDetail() {
             <div className="info-block">
               <div className="info-k">ชื่อเรื่อง / Title</div>
               <div className="info-v">
-                {req.titleTH} / {req.titleEN}
+                {report.titleTH} / {report.titleEN}
               </div>
             </div>
 
             <div className="info-block">
               <div className="info-k">ประเภทปัญหา / Problem Type</div>
-              <div className="info-v">{req.typeTH}</div>
+              <div className="info-v">{report.typeTH}</div>
             </div>
 
             <div className="info-block" style={{ gridColumn: "1 / -1" }}>
               <div className="info-k">รายละเอียดอาการ / Description</div>
-              <div className="info-v">{req.description || "-"}</div>
+              <div className="info-v">{report.description || "-"}</div>
             </div>
 
             <div className="info-block">
               <div className="info-k">สถานที่ / Location</div>
               <div className="info-v">
-                {req.locationTH}
-                <div className="muted">{req.locationEN}</div>
+                {report.locationTH}
+                <div className="muted">{report.locationEN}</div>
               </div>
             </div>
 
             <div className="info-block">
               <div className="info-k">หมายเลขครุภัณฑ์ / Asset Number</div>
-              <div className="info-v">{req.assetNo}</div>
+              <div className="info-v">{report.assetNo}</div>
             </div>
 
             <div className="info-block">
               <div className="info-k">ผู้แจ้ง / Reporter</div>
               <div className="info-v">
-                {req.reporter}
-                <div className="muted">Tel: {req.tel}</div>
+                {report.reporter}
+                <div className="muted">Tel: {report.tel}</div>
               </div>
             </div>
 
             <div className="info-block">
               <div className="info-k">วันรับแจ้ง / Submitted Date</div>
               <div className="info-v">
-                {req.dateTH}
-                <div className="muted">{req.dateEN}</div>
+                {report.dateTH}
+                <div className="muted">{report.dateEN}</div>
               </div>
             </div>
           </div>
@@ -289,7 +283,7 @@ export default function RequestDetail() {
                 <div className="act-title">
                   ส่งคำร้องซ่อมแล้ว / Request submitted
                 </div>
-                <div className="muted">{req.dateTH} 14:30</div>
+                <div className="muted">{report.dateTH} 14:30</div>
               </div>
             </div>
 
@@ -299,7 +293,7 @@ export default function RequestDetail() {
                 <div className="act-title">
                   เจ้าหน้าที่ตรวจสอบคำร้อง / Staff reviewed request
                 </div>
-                <div className="muted">โดย ST001 • {req.dateTH} 15:45</div>
+                <div className="muted">โดย ST001 • {report.dateTH} 15:45</div>
               </div>
             </div>
           </div>
@@ -308,3 +302,4 @@ export default function RequestDetail() {
     </main>
   );
 }
+

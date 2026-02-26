@@ -116,7 +116,7 @@ body{
 /* Dashboard layout */
 .stats{
   display:grid;
-  grid-template-columns: repeat(4, 1fr) 320px;
+  grid-template-columns: repeat(4, 1fr);
   gap:14px;
   align-items:stretch;
 }
@@ -272,7 +272,7 @@ select{ min-width:180px; }
 .sort{ display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; }
 
 .grid{ margin-top:14px; display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; }
-@media (max-width: 1050px){ .stats{ grid-template-columns: repeat(2, 1fr) 320px; } .grid{ grid-template-columns: repeat(3, 1fr);} }
+@media (max-width: 1050px){ .stats{ grid-template-columns: repeat(2, 1fr); } .grid{ grid-template-columns: repeat(3, 1fr);} }
 @media (max-width: 780px){ .stats{ grid-template-columns: 1fr; } .dash-grid{ grid-template-columns:1fr; } .grid{ grid-template-columns: repeat(2, 1fr);} }
 @media (max-width: 520px){ .grid{ grid-template-columns:1fr;} select{ min-width:100%; } }
 
@@ -535,7 +535,7 @@ select{ min-width:180px; }
 .nc-tabs{
   display:flex;
   gap:10px;
-  padding:12px 16px;
+  padding:12px 16px 0;
 }
 
 .nc-tab{
@@ -556,7 +556,7 @@ select{ min-width:180px; }
 }
 
 .nc-list{
-  padding:6px 0;
+  padding:0;
   overflow:auto;
 }
 

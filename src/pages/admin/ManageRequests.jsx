@@ -4,10 +4,11 @@ import { Pill } from "../../components/UI.jsx";
 import { reports, STATUS, statusTone } from "../../../data/mock.js";
 
 const TABS = [
-  { key: "all", label: "ทั้งหมด / All", count: 127 },
-  { key: "new", label: "ใหม่ / New", count: 23 },
-  { key: "progress", label: "กำลังดำเนินการ / In Progress", count: 45 },
-  { key: "done", label: "เสร็จสิ้น / Completed", count: 59 },
+  { key: "all", label: "ทั้งหมด / All", count: reports.length },
+  { key: "new", label: "ใหม่ / New", count: reports.filter(r => r.status === STATUS.PENDING).length },
+  { key: "progress", label: "กำลังดำเนินการ / In Progress", count: reports.filter(r => r.status === STATUS.IN_PROGRESS).length },
+  { key: "done", label: "เสร็จสิ้น / Completed", count: reports.filter(r => r.status === STATUS.COMPLETED).length },
+  { key: "cancelled", label: "ยกเลิก / Cancelled", count: reports.filter(r => r.status === STATUS.CANCELLED).length },
 ];
 
 export default function ManageRequests() {
@@ -22,9 +23,10 @@ export default function ManageRequests() {
   const filtered = useMemo(() => {
         let items = [...reports];
 
-    if (activeTab === "new") items = items.filter((i) => i.status === STATUS.NEW);
-    if (activeTab === "progress") items = items.filter((i) => i.status === STATUS.PROGRESS);
-    if (activeTab === "done") items = items.filter((i) => i.status === STATUS.DONE);
+    if (activeTab === "new") items = items.filter((i) => i.status === STATUS.PENDING);
+    if (activeTab === "progress") items = items.filter((i) => i.status === STATUS.IN_PROGRESS);
+    if (activeTab === "done") items = items.filter((i) => i.status === STATUS.COMPLETED);
+    if (activeTab === "cancelled") items = items.filter((i) => i.status === STATUS.CANCELLED);
 
     if (status) items = items.filter((i) => i.status === status);
     if (location) items = items.filter((i) => i.locationTH.includes(location));
@@ -35,9 +37,9 @@ export default function ManageRequests() {
       const order = {
 
         [STATUS.PENDING]: 1,
-        [STATUS.PROGRESS]: 2,
-        [STATUS.DONE]: 3,
-        [STATUS.CANCELED]: 4,
+        [STATUS.IN_PROGRESS]: 2,
+        [STATUS.COMPLETED]: 3,
+        [STATUS.CANCELLED]: 4,
       };
       items.sort((a, b) => (order[a.status] ?? 99) - (order[b.status] ?? 99));
     }
@@ -85,9 +87,9 @@ export default function ManageRequests() {
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">สถานะ / Status</option>
               <option value={STATUS.PENDING}>{STATUS.PENDING}</option>
-              <option value={STATUS.PROGRESS}>{STATUS.PROGRESS}</option>
-              <option value={STATUS.DONE}>{STATUS.DONE}</option>
-              <option value={STATUS.CANCELED}>{STATUS.CANCELED}</option>
+              <option value={STATUS.IN_PROGRESS}>{STATUS.IN_PROGRESS}</option>
+              <option value={STATUS.COMPLETED}>{STATUS.COMPLETED}</option>
+              <option value={STATUS.CANCELLED}>{STATUS.CANCELLED}</option>
             </select>
 
             <select value={location} onChange={(e) => setLocation(e.target.value)}>
