@@ -1,7 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Card, Pill } from "../../components/UI.jsx";
-import { reports as mockReports, STATUS, statusTone, STATUS_DISPLAY } from "../../../data/mock.js";
+import {
+  reports as mockReports,
+  STATUS,
+  statusTone,
+  STATUS_DISPLAY,
+} from "../../../data/mock.js";
 import styles from "./RequestDetail.module.css";
 import inprogress from "../../assets/inprogress.svg";
 import complete from "../../assets/complete.png";
@@ -11,7 +16,10 @@ export default function RequestDetail() {
   const navigate = useNavigate();
 
   // Find the initial report from mock data
-  const initialReport = useMemo(() => mockReports.find((r) => r.id === id), [id]);
+  const initialReport = useMemo(
+    () => mockReports.find((r) => r.id === id),
+    [id],
+  );
 
   // Use state to hold the report data, allowing for updates
   const [report, setReport] = useState(initialReport);
@@ -37,7 +45,11 @@ export default function RequestDetail() {
   // --- Action Handlers ---
   const handleAcceptJob = () => {
     // TODO: API call to update status to 'in_progress'
-    setReport({ ...report, status: STATUS.IN_PROGRESS, assigned: "STAFF-0024" });
+    setReport({
+      ...report,
+      status: STATUS.IN_PROGRESS,
+      assigned: "STAFF-0024",
+    });
   };
 
   const handleCancelJob = () => {
@@ -55,10 +67,18 @@ export default function RequestDetail() {
       case STATUS.PENDING:
         return (
           <div className={styles.actionBox}>
-            <button type="button" onClick={handleAcceptJob} className={`${styles.actionBtn} ${styles.acceptBtn}`}>
+            <button
+              type="button"
+              onClick={handleAcceptJob}
+              className={`${styles.actionBtn} ${styles.acceptBtn}`}
+            >
               รับงานซ่อม Accept Job
             </button>
-            <button type="button" onClick={handleCancelJob} className={`${styles.actionBtn} ${styles.cancelBtn}`}>
+            <button
+              type="button"
+              onClick={handleCancelJob}
+              className={`${styles.actionBtn} ${styles.cancelBtn}`}
+            >
               ยกเลิกงานซ่อม Cancel Job
             </button>
           </div>
@@ -66,7 +86,11 @@ export default function RequestDetail() {
       case STATUS.IN_PROGRESS:
         return (
           <div className={styles.actionBox}>
-            <button type="button" onClick={handleUpdateProgress} className={`${styles.actionBtn} ${styles.updateBtn}`}>
+            <button
+              type="button"
+              onClick={handleUpdateProgress}
+              className={`${styles.actionBtn} ${styles.updateBtn}`}
+            >
               อัพเดทความคืบหน้างาน Update Progress
             </button>
           </div>
@@ -75,7 +99,7 @@ export default function RequestDetail() {
         return <div className="muted">ไม่มีการดำเนินการสำหรับสถานะนี้</div>;
     }
   };
-  
+
   const steps = [
     {
       key: "submitted",
@@ -88,7 +112,9 @@ export default function RequestDetail() {
       key: "progress",
       labelTH: "ดำเนินการ",
       labelEN: "In Progress",
-      on: report.status === STATUS.IN_PROGRESS || report.status === STATUS.COMPLETED,
+      on:
+        report.status === STATUS.IN_PROGRESS ||
+        report.status === STATUS.COMPLETED,
       tone: "progress",
     },
     {
@@ -131,11 +157,13 @@ export default function RequestDetail() {
             <div className="section-title">สถานะปัจจุบัน / Current Status</div>
             <div className="kv">
               <div className="muted">สถานะ / Status</div>
-              <Pill tone={statusTone(report.status)}>{STATUS_DISPLAY[report.status] || report.status}</Pill>
+              <Pill tone={statusTone(report.status)}>
+                {STATUS_DISPLAY[report.status] || report.status}
+              </Pill>
             </div>
             <div className="kv">
               <div className="muted">ผู้รับผิดชอบ / Assigned</div>
-              <div className="kv-val">{assigned}</div>
+              <div className="kv-val">{report.assigned}</div>
             </div>
 
             {/* <div style={{ marginTop: 10 }}>
@@ -316,4 +344,3 @@ export default function RequestDetail() {
     </main>
   );
 }
-
