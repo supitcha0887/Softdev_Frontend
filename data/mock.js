@@ -97,21 +97,21 @@ const raw_reports = [
   },
   {
     id: "REP003", title: "จอคอมพิวเตอร์เสีย", description: "จอคอมพิวเตอร์ในห้อง 301 (PC-CE301-05) แสดงผลเป็นเส้น", status: STATUS.IN_PROGRESS,
-    image_before_url: "https://images.unsplash.com/photo-1629854747065-4299446d5c27?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
+    image_before_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReyVsdabYU11cklhaHk4_bGhVke2OzsWUfbw&s", image_after_url: null,
     location_id: "LOC001", asset_id: "AST003", reporter_id: "USER004", technician_id: "USER010",
     created_at: "2024-03-03T09:30:00Z", accepted_at: "2024-03-03T10:00:00Z", started_at: "2024-03-03T10:30:00Z", completed_at: null,
     progress: 50, work_notes: [{ timestamp: "2024-03-03T10:00:00Z", note: "รับงานตรวจสอบจอคอมพิวเตอร์" }, { timestamp: "2024-03-03T10:30:00Z", note: "เริ่มดำเนินการตรวจสอบสาเหตุ" }]
   },
   {
     id: "REP004", title: "เครื่องพิมพ์กระดาษติด", description: "เครื่องพิมพ์ HP ในห้อง 401 กระดาษติดบ่อยครั้ง", status: STATUS.COMPLETED,
-    image_before_url: "https://images.unsplash.com/photo-1596707323145-81676f4e2417?auto=format&fit=crop&w=1400&q=60", image_after_url: "https://images.unsplash.com/photo-1596707323145-81676f4e2417?auto=format&fit=crop&w=1400&q=60",
+    image_before_url: "https://www.inkmanonline.com/images/content/original-1617783184355.jpg", image_after_url: "https://images.unsplash.com/photo-1596707323145-81676f4e2417?auto=format&fit=crop&w=1400&q=60",
     location_id: "LOC003", asset_id: "AST004", reporter_id: "USER006", technician_id: "USER010",
     created_at: "2024-03-04T13:00:00Z", accepted_at: "2024-03-04T13:30:00Z", started_at: "2024-03-04T14:00:00Z", completed_at: "2024-03-04T15:00:00Z",
     progress: 100, work_notes: [{ timestamp: "2024-03-04T13:30:00Z", note: "รับงานแก้ไขเครื่องพิมพ์" }, { timestamp: "2024-03-04T14:00:00Z", note: "เริ่มดำเนินการ แก้ไขปัญหาการติดกระดาษ" }, { timestamp: "2024-03-04T15:00:00Z", note: "ดำเนินการเสร็จสิ้น ทดสอบแล้วใช้งานได้ปกติ" }]
   },
   {
     id: "REP005", title: "ปลั๊กไฟชำรุด", description: "ปลั๊กไฟผนังในห้อง 201 ไม่มีไฟออก", status: STATUS.PENDING,
-    image_before_url: "https://images.unsplash.com/photo-1621213768297-f5e9b8f2c69c?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
+    image_before_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtG3zoV0HY3MWYvcuWUDhprr7NDAACB6By-g&s", image_after_url: null,
     location_id: "LOC005", asset_id: "AST007", reporter_id: "USER007", technician_id: null,
     created_at: "2024-03-05T08:45:00Z", accepted_at: null, started_at: null, completed_at: null,
     progress: 0, work_notes: []
@@ -125,7 +125,7 @@ const raw_reports = [
   },
   {
     id: "REP007", title: "Router ห้อง Server ไม่ทำงาน", description: "ไม่สามารถเชื่อมต่ออินเทอร์เน็ตในห้อง Server ได้", status: STATUS.IN_PROGRESS,
-    image_before_url: "https://images.unsplash.com/photo-1587840228468-b80c3e6608f5?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
+    image_before_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJOW1JjffCVCU6kcn4AB1ay4oHptKBXOI7JQ&s", image_after_url: null,
     location_id: "LOC006", asset_id: "AST005", reporter_id: "USER002", technician_id: "USER010",
     created_at: "2024-03-07T09:00:00Z", accepted_at: "2024-03-07T09:15:00Z", started_at: "2024-03-07T09:45:00Z", completed_at: null,
     progress: 20, work_notes: [{ timestamp: "2024-03-07T09:15:00Z", note: "รับงานตรวจสอบ Router" }, { timestamp: "2024-03-07T09:45:00Z", note: "เริ่มดำเนินการ ตรวจสอบการเชื่อมต่อ" }]
