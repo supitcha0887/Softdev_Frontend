@@ -4,18 +4,23 @@ import progress from "../src/assets/progress.svg";
 import finish from "../src/assets/finish.svg";
 
 export const STATUS = {
-  PENDING: "รอรับงาน",
-  APPROVED: "อนุมัติ",
-  IN_PROGRESS: "กำลังดำเนินการ",
-  COMPLETED: "เสร็จสิ้น",
-  CANCELLED: "ยกเลิก",
+  PENDING: "pending",
+  IN_PROGRESS: "in_progress",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+export const STATUS_DISPLAY = {
+  pending: "รอรับงาน",
+  in_progress: "กำลังดำเนินการ",
+  completed: "เสร็จสิ้น",
+  cancelled: "ยกเลิก",
 };
 
 export const statusTone = (s) => {
   if (s === STATUS.COMPLETED) return "ok";
   if (s === STATUS.IN_PROGRESS) return "progress";
   if (s === STATUS.PENDING) return "muted";
-  if (s === STATUS.APPROVED) return "warn";
   if (s === STATUS.CANCELLED) return "bad";
   return "muted";
 };
@@ -89,7 +94,7 @@ const raw_reports = [
     progress: 0, work_notes: []
   },
   {
-    id: "REP002", title: "โปรเจคเตอร์เปิดไม่ติด", description: "โปรเจคเตอร์ในห้อง 302 กดปุ่มเปิดแล้วไม่มีอะไรเกิดขึ้น", status: STATUS.APPROVED,
+    id: "REP002", title: "โปรเจคเตอร์เปิดไม่ติด", description: "โปรเจคเตอร์ในห้อง 302 กดปุ่มเปิดแล้วไม่มีอะไรเกิดขึ้น", status: STATUS.PENDING,
     image_before_url: "https://images.unsplash.com/photo-1526666923127-b2970f64b422?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
     location_id: "LOC002", asset_id: "AST002", reporter_id: "USER003", technician_id: "USER010",
     created_at: "2024-03-02T11:00:00Z", accepted_at: "2024-03-02T12:00:00Z", started_at: null, completed_at: null,
@@ -117,7 +122,7 @@ const raw_reports = [
     progress: 0, work_notes: []
   },
   {
-    id: "REP006", title: "เก้าอี้ห้องเรียนหัก", description: "เก้าอี้ไม้ในห้อง 201 ชำรุด ขาหัก 1 ตัว", status: STATUS.APPROVED,
+    id: "REP006", title: "เก้าอี้ห้องเรียนหัก", description: "เก้าอี้ไม้ในห้อง 201 ชำรุด ขาหัก 1 ตัว", status: STATUS.PENDING,
     image_before_url: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
     location_id: "LOC005", asset_id: "AST006", reporter_id: "USER008", technician_id: "USER010",
     created_at: "2024-03-06T14:15:00Z", accepted_at: "2024-03-06T14:30:00Z", started_at: null, completed_at: null,
@@ -152,7 +157,7 @@ const raw_reports = [
     progress: 0, work_notes: []
   },
   {
-    id: "REP011", title: "โปรแกรม Adobe Photoshop ใช้งานไม่ได้", description: "โปรแกรม Adobe Photoshop ในห้อง 302 เปิดแล้วค้าง", status: STATUS.APPROVED,
+    id: "REP011", title: "โปรแกรม Adobe Photoshop ใช้งานไม่ได้", description: "โปรแกรม Adobe Photoshop ในห้อง 302 เปิดแล้วค้าง", status: STATUS.PENDING,
     image_before_url: "https://images.unsplash.com/photo-1599863261642-16e6d3090623?auto=format&fit=crop&w=1400&q=60", image_after_url: null,
     location_id: "LOC002", asset_id: "AST011", reporter_id: "USER001", technician_id: "USER010",
     created_at: "2024-03-11T13:00:00Z", accepted_at: "2024-03-11T13:30:00Z", started_at: null, completed_at: null,
@@ -197,27 +202,22 @@ export const updateReportStatus = (reportId, status, completedAt = null) => {
 
 export const notifications = [
   { id: "NOT001", user_id: "USER001", title: "คำร้องของคุณ REP001 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง 'เครื่องปรับอากาศไม่เย็น' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP001", create_at: "2024-03-01T10:05:00Z" },
-  { id: "NOT002", user_id: "USER003", title: "คำร้อง REP002 ได้รับการอนุมัติ", desc: "คำร้อง 'โปรเจคเตอร์เปิดไม่ติด' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP002", create_at: "2024-03-02T12:05:00Z" },
   { id: "NOT003", user_id: "USER010", title: "มีคำร้องใหม่ REP002 สำหรับคุณ", desc: "โปรเจคเตอร์เปิดไม่ติดในห้อง 302", type: "warning", is_read: false, related_report_id: "REP002", create_at: "2024-03-02T12:06:00Z" },
   { id: "NOT004", user_id: "USER004", title: "คำร้อง REP003 อยู่ระหว่างดำเนินการ", desc: "คำร้อง 'จอคอมพิวเตอร์เสีย' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: true, related_report_id: "REP003", create_at: "2024-03-03T10:35:00Z" },
   { id: "NOT005", user_id: "USER010", title: "อัปเดตสถานะ REP003", desc: "เริ่มดำเนินการตรวจสอบจอคอมพิวเตอร์ในห้อง 301", type: "info", is_read: false, related_report_id: "REP003", create_at: "2024-03-03T10:36:00Z" },
   { id: "NOT006", user_id: "USER006", title: "คำร้อง REP004 เสร็จสมบูรณ์", desc: "คำร้อง 'เครื่องพิมพ์กระดาษติด' ของคุณได้รับการแก้ไขเรียบร้อยแล้ว", type: "success", is_read: false, related_report_id: "REP004", create_at: "2024-03-04T15:05:00Z" },
   { id: "NOT007", user_id: "USER007", title: "คำร้องของคุณ REP005 ถูกสร้างแล้ว", desc: "เราได้รับคำร้อง 'ปลั๊กไฟชำรุด' ของคุณแล้ว", type: "info", is_read: false, related_report_id: "REP005", create_at: "2024-03-05T08:50:00Z" },
-  { id: "NOT008", user_id: "USER008", title: "คำร้อง REP006 ได้รับการอนุมัติ", desc: "คำร้อง 'เก้าอี้ห้องเรียนหัก' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: true, related_report_id: "REP006", create_at: "2024-03-06T14:35:00Z" },
   { id: "NOT009", user_id: "USER002", title: "คำร้อง REP007 อยู่ระหว่างดำเนินการ", desc: "คำร้อง 'Router ห้อง Server ไม่ทำงาน' ของคุณกำลังดำเนินการแก้ไข", type: "info", is_read: false, related_report_id: "REP007", create_at: "2024-03-07T09:50:00Z" },
   { id: "NOT010", user_id: "USER009", title: "คำร้อง REP009 ถูกยกเลิก", desc: "คำร้อง 'น้ำรั่วจากชักโครก' ของคุณถูกยกเลิกเนื่องจากต้องรออะไหล่", type: "error", is_read: false, related_report_id: "REP009", create_at: "2024-03-09T16:40:00Z" },
-  { id: "NOT011", user_id: "USER001", title: "คำร้อง REP011 ได้รับการอนุมัติ", desc: "คำร้อง 'โปรแกรม Adobe Photoshop ใช้งานไม่ได้' ของคุณได้รับการอนุมัติแล้ว", type: "success", is_read: false, related_report_id: "REP011", create_at: "2024-03-11T13:35:00Z" },
 ];
 
 const calculateStats = (reports) => {
   const pendingCount = reports.filter(r => r.status === STATUS.PENDING).length;
-  const approvedCount = reports.filter(r => r.status === STATUS.APPROVED).length;
   const inProgressCount = reports.filter(r => r.status === STATUS.IN_PROGRESS).length;
   const completedCount = reports.filter(r => r.status === STATUS.COMPLETED).length;
 
   return [
     { labelTH: "รอรับงาน", labelEN: "Pending", value: pendingCount, pill: "PENDING", tone: "muted", icon: pending },
-    { labelTH: "อนุมัติ", labelEN: "Approved", value: approvedCount, pill: "APPROVED", tone: "warn", icon: new_work },
     { labelTH: "กำลังดำเนินการ", labelEN: "In Progress", value: inProgressCount, pill: "IN_PROGRESS", tone: "progress", icon: progress },
     { labelTH: "เสร็จสิ้น", labelEN: "Completed", value: completedCount, pill: "COMPLETED", tone: "ok", icon: finish },
   ];
