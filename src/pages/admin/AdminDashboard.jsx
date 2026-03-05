@@ -105,8 +105,8 @@ export default function AdminDashboard() {
     const inprogressReport = report.filter(rep => rep.status.toLowerCase() === "in_progress").length;
     const completedReports = report.filter(rep => rep.status.toLowerCase() === "completed").length;
     return [
-      {th_stat: "รอรับงาน", en_stat:"Pending", value: pendingReports, pill:"PENDING", tone: "muted", icon: pending},
-      {th_stat: "รับงานแล้ว", en_stat:"Accepted", value: acceptedReports, pill:"ACCEPTED", tone: "muted", icon: accepted},
+      {th_stat: "รอรับงาน", en_stat:"Pending", value: pendingReports, pill:"PENDING", tone: "pending", icon: pending},
+      {th_stat: "รับงานแล้ว", en_stat:"Accepted", value: acceptedReports, pill:"ACCEPTED", tone: "accepted", icon: accepted},
       {th_stat: "กำลังดำเนินการ", en_stat: "In Progress", value: inprogressReport, pill: "IN_PROGRESS", tone: "progress", icon: progress },
       {th_stat: "เสร็จสิ้น", en_stat: "Completed", value: completedReports, pill: "COMPLETED", tone: "ok", icon: finish },
     ];

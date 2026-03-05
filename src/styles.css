@@ -924,3 +924,23 @@ select { min-width: 180px; }
   display:flex;
   align-items:center;
 }
+
+.pill.pending{
+  background:#fff7ed;
+  color:#c2410c;
+}
+
+.pill.accepted{
+  background:#faf5ff;
+  color:#7c3aed;
+}
+
+.pill.progress{
+  background:#eff6ff;
+  color:#2563eb;
+}
+
+.pill.ok{
+  background:#ecfdf5;
+  color:#059669;
+}

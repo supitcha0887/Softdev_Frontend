@@ -186,7 +186,7 @@ export default function RequestDetail() {
 
   // --- Conditional Action Buttons ---
   const renderActions = () => {
-    const isOwner = reports?.technician_id === AdminData?.id;
+    const isOwner = reports?.assigned === AdminData?.name;
     switch (reports?.status?.toLowerCase()) {
       case "pending":
         return (
@@ -228,7 +228,15 @@ export default function RequestDetail() {
             </div>
           );
         }
-        return <button type="disable" className={`${styles.blockBtn}`}>🔒 งานนี้ถูกรับโดยเจ้าหน้าที่ท่านอื่น.</button>;
+        return (
+          <button
+            type="button"
+            className={styles.blockBtn}
+            disabled
+          >
+            🔒 งานนี้ถูกรับโดยเจ้าหน้าที่ท่านอื่น
+          </button>
+        );
       default:
         return <button type="disable" className={`${styles.blockBtn}`}>ไม่มีการดำเนินการสำหรับสถานะนี้</button>;
     }
