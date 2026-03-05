@@ -18,13 +18,24 @@ export default function RequestDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const statusTone = (s) => {
-    if (s === "completed") return "ok";
-    if (s === "in_progress") return "progress";
-    if (s === "accepted") return "plum";
-    if (s === "pending") return "warn";
-    return "muted";
-  };
+  function statusTone(status) {
+    switch (status) {
+      case "pending":
+        return "pending";
+
+      case "accepted":
+        return "accepted";
+
+      case "in_progress":
+        return "in_progress";
+
+      case "completed":
+        return "completed";
+
+      default:
+        return "muted";
+    }
+  }
 
       const fetchReports = async () =>{
         const token = localStorage.getItem("token");
@@ -175,7 +186,7 @@ export default function RequestDetail() {
 
   // --- Conditional Action Buttons ---
   const renderActions = () => {
-    const isOwner = reports?.technician_id === AdminData?.id;
+    const isOwner = reports?.assigned === AdminData?.name;
     switch (reports?.status?.toLowerCase()) {
       case "pending":
         return (
@@ -217,7 +228,15 @@ export default function RequestDetail() {
             </div>
           );
         }
-        return <button type="disable" className={`${styles.blockBtn}`}>🔒 งานนี้ถูกรับโดยเจ้าหน้าที่ท่านอื่น.</button>;
+        return (
+          <button
+            type="button"
+            className={styles.blockBtn}
+            disabled
+          >
+            🔒 งานนี้ถูกรับโดยเจ้าหน้าที่ท่านอื่น
+          </button>
+        );
       default:
         return <button type="disable" className={`${styles.blockBtn}`}>ไม่มีการดำเนินการสำหรับสถานะนี้</button>;
     }

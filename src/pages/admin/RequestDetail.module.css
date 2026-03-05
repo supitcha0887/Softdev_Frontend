@@ -44,3 +44,22 @@
 .updateBtn:hover {
     background-color: #B71C1C;
 }
+.blockBtn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    background-color: #e5e7eb;   /* สีเทา */
+    color: #475569;
+
+    cursor: default;             /* เอา pointer ออก */
+    pointer-events: none;        /* กดไม่ได้ */
+
+    text-align: center;
+}

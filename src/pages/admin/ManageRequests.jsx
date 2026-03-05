@@ -24,13 +24,39 @@ export default function ManageRequests() {
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  const statusTone = (s) => {
-    if (s === "completed") return "ok";
-    if (s === "in_progress") return "progress";
-    if (s === "accepted") return "plum";
-    if (s === "pending") return "warn";
-    return "muted";
-  };;
+function statusToThai(status) {
+  const s = String(status || "").toUpperCase().trim();
+
+  const map = {
+    PENDING: "รอรับงาน",
+    ACCEPTED: "รับงานแล้ว",
+    IN_PROGRESS: "กำลังดำเนินการ",
+    COMPLETED: "เสร็จสิ้น",
+    REJECTED: "ปฏิเสธ",
+    CANCELLED: "ยกเลิก",
+  };
+
+  return map[s] || status || "";
+}
+
+  function statusTone(status) {
+    switch (status) {
+      case "pending":
+        return "pending";
+
+      case "accepted":
+        return "accepted";
+
+      case "in_progress":
+        return "in_progress";
+
+      case "completed":
+        return "completed";
+
+      default:
+        return "muted";
+    }
+  }
   useEffect(() => {
     const token = localStorage.getItem("token");
     const fetchUserData = async () => {
@@ -327,7 +353,9 @@ export default function ManageRequests() {
                     <div className="card-title">{item.titleTH}</div>
                     <div className="card-sub">{item.locationTH}</div>
                   </div>
-                  <Pill tone={statusTone(item.status.toLowerCase())}>{item.status}</Pill>
+                  <Pill tone={statusTone(item.status.toLowerCase())}>
+                    {statusToThai(item.status)}
+                  </Pill>
                 </div>
 
                 <div className="card-meta">
