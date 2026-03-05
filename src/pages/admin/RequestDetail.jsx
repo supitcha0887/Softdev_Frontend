@@ -18,13 +18,24 @@ export default function RequestDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const statusTone = (s) => {
-    if (s === "completed") return "ok";
-    if (s === "in_progress") return "progress";
-    if (s === "accepted") return "plum";
-    if (s === "pending") return "warn";
-    return "muted";
-  };
+  function statusTone(status) {
+    switch (status) {
+      case "pending":
+        return "pending";
+
+      case "accepted":
+        return "accepted";
+
+      case "in_progress":
+        return "in_progress";
+
+      case "completed":
+        return "completed";
+
+      default:
+        return "muted";
+    }
+  }
 
       const fetchReports = async () =>{
         const token = localStorage.getItem("token");

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import svg from "../assets/svg.png";
@@ -16,12 +16,10 @@ function IconBell() {
   );
 }
 
-export default function Navbar({ setNcOpen, notifs }) {
+export default function Navbar({ setNcOpen, unreadCount = 0 }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isList = pathname.startsWith("/requests");
-
-  const unreadCount = useMemo(() => notifs.filter((n) => !n.read).length, [notifs]);
 
   const badgeText = unreadCount > 9 ? "9+" : String(unreadCount);
 
@@ -30,7 +28,7 @@ export default function Navbar({ setNcOpen, notifs }) {
       <div className="topbar-left">
         <Link to="/dashboard" className="brand">
           <div className="brand-badge">
-              <img src={svg} alt="Repair Logo" />
+            <img src={svg} alt="Repair Logo" />
           </div>
           <div className="brand-text">
             <div className="brand-title">ระบบแจ้งซ่อม</div>
@@ -41,20 +39,22 @@ export default function Navbar({ setNcOpen, notifs }) {
 
       <div className="topbar-right">
         <nav className="crumbs" aria-label="breadcrumb">
-              <Link to="/dashboard" className={`crumb-link ${!isList ? "active" : ""}`}>หน้าแรก / Home</Link>
-              <Link to="/requests" className={`crumb-link ${isList ? "active" : ""}`}>รายการแจ้งซ่อม / List</Link>
-              </nav>
+          <Link to="/dashboard" className={`crumb-link ${!isList ? "active" : ""}`}>
+            หน้าแรก / Home
+          </Link>
+          <Link to="/requests" className={`crumb-link ${isList ? "active" : ""}`}>
+            รายการแจ้งซ่อม / List
+          </Link>
+        </nav>
 
-        {/* ✅ Bell + numeric badge */}
         <button
           className={styles.notificationBtn}
           aria-label="notifications"
           type="button"
-          onClick={() => setNcOpen(true)}
+          onClick={() => setNcOpen?.(true)}
         >
           <IconBell />
 
-          {/* ✅ แสดงเป็นตัวเลขเมื่อมี unread และซ่อนเมื่อ 0 */}
           {unreadCount > 0 && (
             <span className={styles.notificationBadge} aria-label={`${unreadCount} unread`}>
               {badgeText}
@@ -63,9 +63,10 @@ export default function Navbar({ setNcOpen, notifs }) {
         </button>
 
         <div className="user-chip">
-              <img className="user-icon" src={user} alt="status" />
+          <img className="user-icon" src={user} alt="status" />
           <span>STAFF-0024</span>
-      </div>
+        </div>
+
         <button
           className={styles.logoutBtn}
           onClick={async () => {

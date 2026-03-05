@@ -164,16 +164,24 @@ export default function UpdateProgress() {
         );
     }
     
-    const statusTone = (status) => {
-        const tones = {
-            "pending": 'warn',
-            "in_progress": 'progress',
-            "completed": 'ok',
-            "cancelled": 'danger',
-            "approved": 'new',
-        };
-        return tones[status] || 'default';
-    }
+    function statusTone(status) {
+        switch (status) {
+            case "pending":
+            return "pending";
+
+            case "accepted":
+            return "accepted";
+
+            case "in_progress":
+            return "in_progress";
+
+            case "completed":
+            return "completed";
+
+            default:
+            return "muted";
+        }
+        }
     
     // --- Render functions for dynamic form ---
 
