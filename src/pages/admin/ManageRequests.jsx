@@ -1,51 +1,210 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect} from "react";
 import { Link } from "react-router-dom";
 import { Pill } from "../../components/UI.jsx";
-import { reports, STATUS, statusTone } from "../../../data/mock.js";
+import { STATUS} from "../../../data/mock.js";
+import { supabase } from "../../supabaseClient";
 
-const TABS = [
-  { key: "all", label: "ทั้งหมด / All", count: reports.length },
-  { key: "new", label: "ใหม่ / New", count: reports.filter(r => r.status === STATUS.PENDING).length },
-  { key: "progress", label: "กำลังดำเนินการ / In Progress", count: reports.filter(r => r.status === STATUS.IN_PROGRESS).length },
-  { key: "done", label: "เสร็จสิ้น / Completed", count: reports.filter(r => r.status === STATUS.COMPLETED).length },
-  { key: "cancelled", label: "ยกเลิก / Cancelled", count: reports.filter(r => r.status === STATUS.CANCELLED).length },
-];
+
 
 export default function ManageRequests() {
+  const [AdminData, setAdmin] = useState("");
+  const [reports, setReports] = useState([]);
+  // const [reportstat, setReportstat] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [status, setStatus] = useState("");
-  const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [locations, setLocation] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [type, setType] = useState("");
+  const [category, setCategoty] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [sort, setSort] = useState("latest");
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  const filtered = useMemo(() => {
-        let items = [...reports];
+  const statusTone = (s) => {
+    if (s === "completed") return "ok";
+    if (s === "in_progress") return "progress";
+    if (s === "accepted") return "plum";
+    if (s === "pending") return "warn";
+    return "muted";
+  };;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const fetchUserData = async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (activeTab === "new") items = items.filter((i) => i.status === STATUS.PENDING);
-    if (activeTab === "progress") items = items.filter((i) => i.status === STATUS.IN_PROGRESS);
-    if (activeTab === "done") items = items.filter((i) => i.status === STATUS.COMPLETED);
-    if (activeTab === "cancelled") items = items.filter((i) => i.status === STATUS.CANCELLED);
+      if (userError || !user) {
+        setAdmin("");
+        setUnreadCount(0);
+        localStorage.removeItem("token");
+        navigate("/");
+        return;
+      }
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from("users")
+          .select("full_name, user_id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profileError) throw profileError;
+        setAdmin({
+          id: profile.user_id,
+          name: profile.full_name
+        })
+
+      } catch (error) {
+        setAdmin("");
+      }
+    };
+    const fetchReports = async () =>{
+      if(!token){
+        setError("No authentication token found.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+
+      try{
+        const reportsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/reports`,{
+          method: "GET",
+          headers: {Authorization: `Bearer ${token}`},
+        });
+        
+        if (!reportsResponse.ok) {
+          if (reportsResponse.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            return;
+          }
+          throw new Error(`HTTP error! status: ${reportsResponse.status}`);
+        }
+        const allReports = await reportsResponse.json();
+        setReports(allReports);
+      }catch(err){
+        setError(err.message || "Failed to fetch reports check the API.");
+      }finally{
+        setLoading(false);
+      }
+    };
+    const fetchLocation = async () =>{
+      if(!token){
+        setError("No authentication token found.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try{
+        const locationsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/locations`,{
+          method: "GET",
+          headers: {Authorization: `Bearer ${token}`},
+        });
+        
+        if (!locationsResponse.ok) {
+          if (locationsResponse.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            return;
+          }
+          throw new Error(`HTTP error! status: ${locationsResponse.status}`);
+        }
+        const allLocation = await locationsResponse.json();
+        setLocation(allLocation);
+      }catch(err){
+        setError(err.message || "Failed to fetch reports check the API.");
+      }finally{
+        setLoading(false);
+      }
+    };
+    const fetchCategory = async () =>{
+      if(!token){
+        setError("No authentication token found.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+
+      try{
+        const TypeResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/dashboard/asset-categories`,{
+          method: "GET",
+          headers: {Authorization: `Bearer ${token}`},
+        });
+        
+        if (!TypeResponse.ok) {
+          if (TypeResponse.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+            return;
+          }
+          throw new Error(`HTTP error! status: ${TypeResponse.status}`);
+        }
+        const Typeall = await TypeResponse.json();
+        setCategoty(Typeall);
+      }catch(err){
+        setError(err.message || "Failed to fetch reports check the API.");
+      }finally{
+        setLoading(false);
+      }
+    };
+    fetchUserData();
+    fetchReports();
+    fetchLocation();
+    fetchCategory();
+  
+  }, []);
+  const filtered = useMemo(() => {
+
+    if (!Array.isArray(reports)) return [];
+    let items = [...reports];
+
+    if (activeTab === "new") items = items.filter((i) => i.status === "PENDING");
+    if (activeTab === "progress") items = items.filter((i) => i.status === "IN_PROGRESS");
+    if (activeTab === "done") items = items.filter((i) => i.status === "COMPLETED");
+    if (activeTab === "accepted") items = items.filter((i) => i.status === "ACCEPTED");
 
     if (status) items = items.filter((i) => i.status === status);
-    if (location) items = items.filter((i) => i.locationTH.includes(location));
+
+    if (selectedLocation) items = items.filter((i) => 
+      i.locationTH && i.locationTH.includes(selectedLocation));
+
+
     if (type) items = items.filter((i) => i.typeTH.includes(type));
+
+    if (startDate || endDate) {
+      items = items.filter((i) => {
+        if (!i.dateEN) return false;
+        
+        const reportDate = new Date(i.dateEN).getTime();
+        const start = startDate ? new Date(startDate).getTime() : -Infinity;
+        const end = endDate ? new Date(endDate).getTime() : Infinity;
+
+        // ตั้งค่าให้ end ครอบคลุมถึงสิ้นวัน (23:59:59) เพื่อไม่ให้ตกหล่น
+        const endWithTime = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : Infinity;
+
+        return reportDate >= start && reportDate <= endWithTime;
+      });
+    }
 
     if (sort === "oldest") items.reverse();
     if (sort === "status") {
       const order = {
 
-        [STATUS.PENDING]: 1,
-        [STATUS.IN_PROGRESS]: 2,
-        [STATUS.COMPLETED]: 3,
-        [STATUS.CANCELLED]: 4,
+        ["pending"]: 1,
+        ["in_progress"]: 2,
+        ["completed"]: 3,
+        ["accepted"]: 4,
       };
       items.sort((a, b) => (order[a.status] ?? 99) - (order[b.status] ?? 99));
     }
 
     return items;
-  }, [activeTab, status, location, type, sort]);
+  }, [reports, activeTab, status, selectedLocation, type, sort, startDate, endDate]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const current = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -55,8 +214,18 @@ export default function ManageRequests() {
     setLocation("");
     setType("");
     setSort("latest");
+    setStartDate(""); // ล้างวันที่เริ่ม
+    setEndDate("");   // ล้างวันที่สิ้นสุด
     setPage(1);
   };
+
+  const TABS = [
+  { key: "all", label: "ทั้งหมด / All", count: reports.length },
+  { key: "new", label: "ใหม่ / New", count: reports.filter(r => r.status === "PENDING").length },
+  { key: "accepted", label: "รับงาน / Accepted", count: reports.filter(r => r.status === "ACCEPTED").length },
+  { key: "progress", label: "กำลังดำเนินการ / In Progress", count: reports.filter(r => r.status === "IN_PROGRESS").length },
+  { key: "done", label: "เสร็จสิ้น / Completed", count: reports.filter(r => r.status === "COMPLETED").length },
+];
 
   return (
     <>
@@ -84,33 +253,49 @@ export default function ManageRequests() {
 
         <div className="filters">
           <div className="filters-row">
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="">สถานะ / Status</option>
-              <option value={STATUS.PENDING}>{STATUS.PENDING}</option>
-              <option value={STATUS.IN_PROGRESS}>{STATUS.IN_PROGRESS}</option>
-              <option value={STATUS.COMPLETED}>{STATUS.COMPLETED}</option>
-              <option value={STATUS.CANCELLED}>{STATUS.CANCELLED}</option>
+            <select value={reports.status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">ทุกสถานะ / All Status</option>
+              <option value="PENDING">รอรับงาน (Pending)</option>
+              <option value="ACCEPTED">รับงานแล้ว (Accepted)</option>
+              <option value="IN_PROGRESS">กำลังดำเนินการ (In Progress)</option>
+              <option value="COMPLETED">เสร็จสิ้น (Completed)</option>
             </select>
 
-            <select value={location} onChange={(e) => setLocation(e.target.value)}>
+            <select value={selectedLocation} onChange={(e) => {
+              setSelectedLocation(e.target.value),
+              setPage(1);
+            }}>
               <option value="">สถานที่ / Location</option>
-              <option value="อาคาร A">อาคาร A</option>
-              <option value="อาคาร B">อาคาร B</option>
-              <option value="อาคาร C">อาคาร C</option>
+                {Array.isArray(locations) && locations.map((l) => (
+                  <option key={l.id || l.name} value={l.name}>
+                    {l.name}
+                  </option>
+                ))}
             </select>
 
-            <select value={type} onChange={(e) => setType(e.target.value)}>
+            <select value={type} onChange={(e) => 
+              setType(e.target.value)}>
               <option value="">ประเภท / Type</option>
-              <option value="แอร์">แอร์</option>
-              <option value="โสต">โสตฯ</option>
-              <option value="อาคาร">อาคาร</option>
-              <option value="เฟอร์นิเจอร์">เฟอร์นิเจอร์</option>
+              {Array.isArray(category) && category.map((c) =>
+                <option key={c.id || c.name} value={c.name}>
+                  {c.name}
+                </option>
+              )}
             </select>
-
             <div className="date-range">
-              <input type="date" aria-label="from date" />
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                aria-label="from date" 
+              />
               <span className="to">to</span>
-              <input type="date" aria-label="to date" />
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                aria-label="to date" 
+              />
             </div>
           </div>
 
@@ -124,7 +309,6 @@ export default function ManageRequests() {
               <select value={sort} onChange={(e) => setSort(e.target.value)}>
                 <option value="latest">ใหม่ล่าสุด / Newest</option>
                 <option value="oldest">เก่าสุด / Oldest</option>
-                <option value="status">ตามสถานะ / Status</option>
               </select>
             </div>
           </div>
@@ -143,11 +327,11 @@ export default function ManageRequests() {
                     <div className="card-title">{item.titleTH}</div>
                     <div className="card-sub">{item.locationTH}</div>
                   </div>
-                  <Pill tone={statusTone(item.status)}>{item.status}</Pill>
+                  <Pill tone={statusTone(item.status.toLowerCase())}>{item.status}</Pill>
                 </div>
 
                 <div className="card-meta">
-                  <span className="muted">{item.id}</span>
+                  <span className="muted">{item.assigned}</span>
                   <span className="muted">{item.dateTH}</span>
                 </div>
 
