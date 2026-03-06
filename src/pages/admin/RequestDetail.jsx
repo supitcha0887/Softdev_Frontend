@@ -5,8 +5,12 @@ import { Card, Pill } from "../../components/UI.jsx";
 
 import { supabase } from "../../supabaseClient";
 import styles from "./RequestDetail.module.css";
-import inprogress from "../../assets/inprogress.svg";
-import complete from "../../assets/complete.png";
+
+import pending from "../../assets/pending.svg";
+import progress from "../../assets/progress.svg";
+import finish from "../../assets/finish.svg";
+import accepted from "../../assets/accepted.svg";
+
 
 export default function RequestDetail() {
   const { id } = useParams();
@@ -242,68 +246,106 @@ export default function RequestDetail() {
     }
   };
 
-const getStatusConfig = (key, currentStatus, inprogress, complete) => {
-  // เช็คว่าสถานะนี้กำลังทำงานอยู่หรือผ่านมาแล้ว (สำหรับระบายสี Timeline)
+const getStatusConfig = (key, currentStatus) => {
   const statusOrder = ["pending", "accepted", "in_progress", "completed"];
-  const currentIndex = statusOrder.indexOf(currentStatus?.toLowerCase());
-  const stepIndex = statusOrder.indexOf(key === "progress" ? "in_progress" : key === "done" ? "completed" : key);
-  
-  const isOn = stepIndex <= currentIndex;
+
+  const normalizedKey =
+    key === "new"
+      ? "pending"
+      : key === "progress"
+      ? "in_progress"
+      : key === "done"
+      ? "completed"
+      : key;
+
+  const currentIndex = statusOrder.indexOf((currentStatus || "").toLowerCase());
+  const stepIndex = statusOrder.indexOf(normalizedKey);
+
+  const isDone = stepIndex < currentIndex;
+  const isCurrent = stepIndex === currentIndex;
+  const isUpcoming = stepIndex > currentIndex;
 
   switch (key) {
     case "new":
       return {
         labelTH: "รอรับงาน",
         labelEN: "Pending",
-        on: isOn,
-        tone: "warn",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )
+        tone: "pending",
+        isDone,
+        isCurrent,
+        isUpcoming,
+        icon: <img src={pending} alt="Pending" className="status-img" />
       };
+
     case "accepted":
       return {
         labelTH: "รับงานแล้ว",
         labelEN: "Accepted",
-        on: isOn,
-        tone: "plum",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M12 8v5l3 2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" strokeWidth="2.2" />
-          </svg>
-        )
+        tone: "accepted",
+        isDone,
+        isCurrent,
+        isUpcoming,
+        icon: <img src={accepted} alt="Accepted" className="status-img" />
       };
+
     case "progress":
       return {
         labelTH: "กำลังดำเนินการ",
         labelEN: "In Progress",
-        on: isOn,
-        tone: "progress",
-        icon: <img src={inprogress} alt="Progress" className="status-img" />
+        tone: "in_progress",
+        isDone,
+        isCurrent,
+        isUpcoming,
+        icon: <img src={progress} alt="Progress" className="status-img" />
       };
+
     case "done":
       return {
         labelTH: "เสร็จสิ้น",
         labelEN: "Completed",
-        on: isOn,
-        tone: "ok",
-        icon: <img src={complete} alt="Done" className="status-img" />
+        tone: "completed",
+        isDone,
+        isCurrent,
+        isUpcoming,
+        icon: <img src={finish} alt="Completed" className="status-img" />
       };
+
     default:
       return {};
   }
 };
 
-  const getLogConfig = (status) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING": return { icon: "＋", className: "" };
-    case "ACCEPTED": return { icon: "⚙", className: "act-ico-blue" };
-    case "IN_PROGRESS": return { icon: "🔧", className: "act-ico-progress" };
-    case "COMPLETED": return { icon: "✓", className: "act-ico-ok" };
-    default: return { icon: "•", className: "" };
+const getLogConfig = (status) => {
+  switch ((status || "").toUpperCase()) {
+    case "PENDING":
+      return {
+        icon: <img src={pending} alt="Pending" className="act-status-img" />,
+        className: "act-ico-pending"
+      };
+
+    case "ACCEPTED":
+      return {
+        icon: <img src={accepted} alt="Accepted" className="act-status-img" />,
+        className: "act-ico-accepted"
+      };
+
+    case "IN_PROGRESS":
+      return {
+        icon: <img src={progress} alt="In Progress" className="act-status-img" />,
+        className: "act-ico-progress"
+      };
+
+    case "COMPLETED":
+      return {
+        icon: <img src={finish} alt="Completed" className="act-status-img" />,
+        className: "act-ico-completed"
+      };
+
+    default:
+      return {
+        icon: <span className="act-dot" />,
+        className: "act-ico-muted"
+      };
   }
 };
 
@@ -402,29 +444,47 @@ const getStatusConfig = (key, currentStatus, inprogress, complete) => {
         </Card>
 
         <Card className="detail-wide">
-          <div className="section-title">สถานะคำร้อง / Status Timeline</div>
-          <div className="statusbar">
-            {["new", "accepted", "progress", "done"].map((key, idx, arr) => {
-              const config = getStatusConfig(key, reports.status, inprogress, complete);
-              
-              return (
-                <div key={key} className="status-step">
-                  <div className="status-top">
-                    <div className={`status-icon ${config.on?`is-on tone-${config.tone}` : "is-off"}`}>
-                      {config.icon}
-                    </div>
-                    {idx !== arr.length - 1 && <div className="status-line" />}
-                  </div>
+  <div className="section-title">สถานะคำร้อง / Status Timeline</div>
+  <div className="statusbar">
+    {["new", "accepted", "progress", "done"].map((key, idx, arr) => {
+      const config = getStatusConfig(key, reports.status);
 
-                  <div className="status-label">
-                    <div className="status-th">{config.labelTH}</div>
-                    <div className="status-en">{config.labelEN}</div>
-                  </div>
-                </div>
-              );
-            })}
+      const iconStateClass = config.isCurrent
+        ? `is-current tone-${config.tone}`
+        : config.isDone
+        ? `is-done tone-${config.tone}`
+        : "is-upcoming";
+
+      const lineStateClass =
+        idx < arr.length - 1
+          ? config.isDone || config.isCurrent
+            ? `line-active line-${config.tone}`
+            : "line-upcoming"
+          : "";
+
+      return (
+        <div key={key} className="status-step">
+          <div className="status-top">
+            <div className={`status-icon ${iconStateClass}`}>
+              {config.icon}
+            </div>
+
+            {idx !== arr.length - 1 && (
+              <div className={`status-line ${lineStateClass}`} />
+            )}
           </div>
-        </Card>
+
+          <div className="status-label">
+            <div className={`status-th ${config.isCurrent ? "is-current-text" : ""}`}>
+              {config.labelTH}
+            </div>
+            <div className="status-en">{config.labelEN}</div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</Card>
 
         <Card className="detail-wide">
           <div className="section-title">บันทึกกิจกรรม / Activity Log</div>
