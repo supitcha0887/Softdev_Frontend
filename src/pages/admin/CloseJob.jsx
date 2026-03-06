@@ -1,19 +1,66 @@
-import React, { useMemo } from "react";
+import React, { useState,useEffect,useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, Pill } from "../../components/UI";
-import { reports as mockReports, repair_costs, updateReportStatus, STATUS } from "../../../data/mock";
+// import { reports as mockReports, repair_costs, updateReportStatus, STATUS } from "../../../data/mock";
 import styles from "./CloseJob.module.css";
 
 export default function CloseJob() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const report = useMemo(() => mockReports.find((r) => r.id === id), [id]);
-  const costs = useMemo(() => repair_costs.filter((c) => c.report_id === id), [id]);
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  const [report, setReport] = useState(null);
+  const [costs, setCosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const totalCost = useMemo(() => {
-    return costs.reduce((sum, item) => sum + (item.total_price || 0), 0);
-  }, [costs]);
+      return costs.reduce((sum, item) => sum + (item.total_price || 0), 0);
+    }, [costs]);
+
+    useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const reportRes = await fetch(
+          `${API}/AdminManage/repair-requests/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!reportRes.ok) throw new Error("Report not found");
+
+        const reportData = await reportRes.json();
+        setReport(reportData);
+
+        const costRes = await fetch(
+          `${API}/AdminAsset/repair-requests/${id}/costs`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (costRes.ok) {
+          const costData = await costRes.json();
+          setCosts(costData || []);
+        }
+
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const duration = useMemo(() => {
     if (!report?.started_at) return "N/A";
@@ -26,11 +73,32 @@ export default function CloseJob() {
     return `${hours > 0 ? `${hours} ชั่วโมง ` : ""}${minutes} นาที`;
   }, [report]);
 
-  const handleConfirmClose = () => {
-    const now = new Date().toISOString();
-    updateReportStatus(id, STATUS.COMPLETED, now);
-    alert("ปิดงานซ่อมเรียบร้อยแล้ว");
-    navigate("/requests");
+  const handleConfirmClose = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `${API}/AdminManage/repair-requests/${id}/close`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            closingNote: "ปิดงานเรียบร้อย",
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to close job");
+
+      alert("ปิดงานซ่อมเรียบร้อยแล้ว");
+      navigate("/requests");
+
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   if (!report) {
@@ -65,7 +133,7 @@ export default function CloseJob() {
                 <h2 className={styles.reportTitle}>{report.titleTH}</h2>
                 <p className={styles.reportSubtitle}>{report.titleEN}</p>
               </div>
-              <Pill tone={report.status === STATUS.COMPLETED ? "ok" : "progress"}>
+              <Pill tone={report.status === "completed" ? "ok" : "progress"}>
                 {report.status}
               </Pill>
             </div>
