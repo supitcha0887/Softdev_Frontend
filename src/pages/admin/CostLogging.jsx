@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo ,useEffect} from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card } from "../../components/UI";
-import { reports as mockReports, addRepairCost } from "../../../data/mock";
+// import { reports as mockReports, addRepairCost } from "../../../data/mock";
 import styles from "./CostLogging.module.css";
 
 // Simple SVG Icon for the empty state
@@ -35,7 +35,39 @@ const EmptyIcon = () => (
 export default function CostLogging() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const report = useMemo(() => mockReports.find((r) => r.id === id), [id]);
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          `${API}/AdminManage/repair-requests/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Report not found");
+
+        const data = await res.json();
+        setReport(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReport();
+  }, [id]);
 
   const [costItems, setCostItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -86,18 +118,42 @@ export default function CostLogging() {
     setCostItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  const handleSaveAndContinue = () => {
-    // If there are items, save them
-    if (costItems.length > 0) {
-        // In a real app, this would be a single API call.
-        costItems.forEach(item => {
-            addRepairCost(id, item);
-        });
-        alert(`Successfully saved ${costItems.length} cost items.`);
-        setCostItems([]); // Clear the list after saving
+  const handleSaveAndContinue = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (costItems.length > 0) {
+        const res = await fetch(
+          `${API}/AdminAsset/repair-requests/${id}/costs`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              items: costItems.map((item) => ({
+                itemName: item.item_name,
+                quantity: Number(item.quantity),
+                unitPrice: Number(item.unit_price),
+                supplier: item.supplier || "",
+                note: item.note || "",
+              })),
+            }),
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to save costs");
+
+        const data = await res.json();
+
+        alert(data.message || "บันทึกรายการค่าใช้จ่ายเรียบร้อย");
+      }
+
+      navigate(`/requests/${id}/close-job`);
+    } catch (err) {
+      alert(err.message);
     }
-    // Always navigate to the next step
-    navigate(`/requests/${id}/close-job`);
   };
 
   const newItemTotalPrice = (parseFloat(newItem.quantity) || 0) * (parseFloat(newItem.unit_price) || 0);
@@ -118,7 +174,7 @@ export default function CostLogging() {
       <section className="hero hero-manage">
         <h1>บันทึกค่าใช้จ่าย / Cost Logging System</h1>
         <p>
-          Request ID: #{report.id} &bull; {report.titleTH}
+          Request ID: #{report.id} &bull; {report.titleTH || report.title}
         </p>
       </section>
 

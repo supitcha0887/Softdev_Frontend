@@ -62,6 +62,8 @@ export default function UpdateProgress() {
   const [compressedFileSize, setCompressedFileSize] = useState(null);
   const [isCompressing, setIsCompressing] = useState(false);
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   // ---------- Fetch report (REAL DATA) ----------
   useEffect(() => {
     const fetchReport = async () => {
@@ -184,40 +186,94 @@ export default function UpdateProgress() {
     }
   };
 
-  // NOTE: ตอนนี้ยังเป็นการบันทึก “ในหน้า” (frontend only)
-  // ถ้า backend มี endpoint update progress ค่อยปรับให้ยิง API
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    let checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
-    if (isOtherChecked && otherChecklistItem.trim() !== "") {
-      checkedItems.push(otherChecklistItem.trim());
+  const token = localStorage.getItem("token");
+
+  let checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
+
+  if (isOtherChecked && otherChecklistItem.trim() !== "") {
+    checkedItems.push(otherChecklistItem.trim());
+  }
+
+  try {
+
+    // =========================
+    // in_progress
+    // =========================
+    if (status === "in_progress") {
+      const res = await fetch(
+        `${API}/AdminManage/repair-requests/${id}/progress`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            note: workNotes,
+            checklist: checkedItems,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update progress");
     }
 
-    const newProgress = {
-      date: new Date().toISOString(),
-      title: STATUS_TH[status] || "อัปเดตสถานะ",
-      description: workNotes,
-      by: report?.assigned || "STAFF",
-      checklist: status === "in_progress" ? checkedItems : [],
-      status,
-    };
+    // =========================
+    // cancel
+    // =========================
+    if (status === "cancelled") {
+      const res = await fetch(
+        `${API}/AdminManage/repair-requests/${id}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            reason: workNotes,
+          }),
+        }
+      );
 
-    setProgressHistory((prev) => [...prev, newProgress]);
+      if (!res.ok) throw new Error("Failed to cancel job");
+    }
+
+    alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
+
+    // reload history จาก backend
+    const reload = await fetch(
+      `${API}/AdminManage/repair-requests/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const updated = await reload.json();
+
+    const historyArr = Array.isArray(updated.history)
+      ? updated.history
+      : Array.isArray(updated.progress)
+      ? updated.progress
+      : [];
+
+    setProgressHistory(historyArr);
 
     // reset form
     setWorkNotes("");
     setCheckedState(new Array(CHECKLIST_ITEMS.length).fill(false));
     setIsOtherChecked(false);
     setOtherChecklistItem("");
-    setImageFile(null);
-    setImagePreview(null);
-    setOriginalFileSize(null);
-    setCompressedFileSize(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
 
-    alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
-  };
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   // ---------- Guards ----------
   if (loading) {
@@ -475,12 +531,16 @@ export default function UpdateProgress() {
                 <div key={index} className={styles.historyItem}>
                   <div className={`${styles.historyDot} ${statusToDotClass[item.status] || ""}`} />
                   <p className={styles.historyDate}>
-                    {item.date ? new Date(item.date).toLocaleString("th-TH") : "-"}
+                    {item.timestamp 
+                    ? new Date(item.timestamp).toLocaleString("th-TH")
+                    : item.date
+                    ? new Date(item.date).toLocaleString("th-TH")
+                    : "-"}
                   </p>
                   <h3 className={styles.historyTitle}>
                     {STATUS_TH[item.status] || item.title || item.status || "อัปเดต"}
                   </h3>
-                  <p className={styles.historyDesc}>{item.description || "-"}</p>
+                  <p className={styles.historyDesc}>{item.description ||  item.note || "-"}</p>
                   <p className={styles.historyBy}>โดย: {item.by || "-"}</p>
 
                   {item.checklist && item.checklist.length > 0 && (
