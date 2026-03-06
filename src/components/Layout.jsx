@@ -24,19 +24,20 @@ function timeAgo(dateLike) {
 function toneFromNotifType(type) {
   const t = String(type || "").toUpperCase().trim();
 
-  if (t === "NEW_REPORT" || t === "REPORT_CREATED") return "pending";
-  if (t === "INFO") return "accepted";
-  if (t === "COMPLETION") return "completed";
-  if (t === "ADMIN_SUMMARY") return "in_progress";
+  if (t === "NEW_REPORT" || t === "REPORT_CREATED" || t === "PENDING") {
+    return "pending";
+  }
 
-  const lower = t.toLowerCase();
-  if (
-    lower === "pending" ||
-    lower === "accepted" ||
-    lower === "in_progress" ||
-    lower === "completed"
-  ) {
-    return lower;
+  if (t === "ACCEPTED" || t === "INFO") {
+    return "accepted";
+  }
+
+  if (t === "IN_PROGRESS" || t === "ADMIN_SUMMARY") {
+    return "in_progress";
+  }
+
+  if (t === "COMPLETED" || t === "COMPLETION") {
+    return "completed";
   }
 
   return "muted";
@@ -45,13 +46,16 @@ function toneFromNotifType(type) {
 function pillTextFromType(type) {
   const t = String(type || "").toUpperCase().trim();
 
-  if (t === "NEW_REPORT") return "คำร้องใหม่";
-  if (t === "REPORT_CREATED") return "ส่งคำร้องสำเร็จ";
-  if (t === "COMPLETION") return "งานเสร็จสิ้น";
-  if (t === "ADMIN_SUMMARY") return "สรุปจากผู้ดูแล";
-  if (t === "INFO") return "ข้อมูล";
+  if (t === "NEW_REPORT") return "รอรับงาน";
+  if (t === "REPORT_CREATED") return "แจ้งซ่อมใหม่";
+  if (t === "PENDING") return "รอรับงาน";
+  if (t === "ACCEPTED") return "รับงานแล้ว";
+  if (t === "IN_PROGRESS") return "กำลังดำเนินการ";
+  if (t === "COMPLETED" || t === "COMPLETION") return "เสร็จสิ้น";
+  if (t === "ADMIN_SUMMARY") return "อัปเดตงาน";
+  if (t === "INFO") return "อัปเดตสถานะ";
 
-  return "การแจ้งเตือน";
+  return "แจ้งเตือน";
 }
 
 function mapNotifToUi(n) {
@@ -59,11 +63,11 @@ function mapNotifToUi(n) {
   const tone = toneFromNotifType(n.type);
 
   return {
-    id: n.id,
-    title: n.title,
-    desc: n.desc,
-    read: !!n.is_read,
-    requestId: n.related_report_id,
+    id: n.id ?? n.notification_id,
+    title: n.title ?? "แจ้งเตือนจากระบบ",
+    desc: n.desc ?? n.description ?? "",
+    read: !!(n.is_read ?? n.read),
+    requestId: n.related_report_id ?? n.requestId,
     statusKey: tone,
     pillTone: tone,
     pillText: pillTextFromType(n.type),
