@@ -266,8 +266,6 @@ export default function UpdateProgress() {
             }),
           }
         );
-    setReport(updated);
-    setProgressHistory(historyArr);
 
         if (!logRes.ok) console.error("Failed to create cancellation log");
       }

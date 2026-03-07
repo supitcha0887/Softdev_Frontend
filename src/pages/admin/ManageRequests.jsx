@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect} from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Link, useSearchParams } from "react-router-dom";
 import { Pill } from "../../components/UI.jsx";
 import { STATUS} from "../../../data/mock.js";
 import { supabase } from "../../supabaseClient";
@@ -209,26 +208,6 @@ function statusToThai(status) {
       setPage(1);
     }
   }, [searchParams]);
-  useEffect(() => {
-  const tab = searchParams.get("tab");
-
-  if (tab === "accepted") {
-    setActiveTab("accepted");
-    setPage(1);
-  } else if (tab === "progress") {
-    setActiveTab("progress");
-    setPage(1);
-  } else if (tab === "done") {
-    setActiveTab("done");
-    setPage(1);
-  } else if (tab === "new") {
-    setActiveTab("new");
-    setPage(1);
-  } else if (tab === "all") {
-    setActiveTab("all");
-    setPage(1);
-  }
-}, [searchParams]);
 
   const filtered = useMemo(() => {
 
