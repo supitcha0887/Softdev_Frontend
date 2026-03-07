@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, Pill } from "../../components/UI";
 import styles from "./UpdateProgress.module.css";
 import { compressImage, formatFileSize } from "../../utils/imageUtils";
+import { supabase } from "../../supabaseClient";
 
 // Mock icons for meta details, replace with actual icons if available
 const LocationIcon = () => "📍";
@@ -118,6 +119,13 @@ export default function UpdateProgress() {
     const s = String(report.status).toLowerCase();
     const validStatuses = ["in_progress", "completed", "cancelled"];
     setStatus(validStatuses.includes(s) ? s : "in_progress");
+
+    // Load existing notes and image if available
+    if (report.work_notes) setWorkNotes(report.work_notes);
+    if (report.image_after_url) {
+      setImagePreview(report.image_after_url);
+      // We don't set imageFile here as it's a URL from backend, not a new file to upload
+    }
   }, [report]);
 
   function statusTone(s) {
@@ -187,93 +195,90 @@ export default function UpdateProgress() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  let checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
+    let checkedItems = CHECKLIST_ITEMS.filter((_, index) => checkedState[index]);
 
-  if (isOtherChecked && otherChecklistItem.trim() !== "") {
-    checkedItems.push(otherChecklistItem.trim());
-  }
-
-  try {
-
-    // =========================
-    // in_progress
-    // =========================
-    if (status === "in_progress") {
-      const res = await fetch(
-        `${API}/AdminManage/repair-requests/${id}/progress`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            note: workNotes,
-            checklist: checkedItems,
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to update progress");
+    if (isOtherChecked && otherChecklistItem.trim() !== "") {
+      checkedItems.push(otherChecklistItem.trim());
     }
 
-    // =========================
-    // cancel
-    // =========================
-    if (status === "cancelled") {
-      const res = await fetch(
-        `${API}/AdminManage/repair-requests/${id}/cancel`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            reason: workNotes,
-          }),
-        }
-      );
+    try {
 
-      if (!res.ok) throw new Error("Failed to cancel job");
-    }
 
-    alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
+      // =========================
+      // in_progress
+      // =========================
+      if (status === "in_progress") {
+        const res = await fetch(
+          `${API}/AdminManage/repair-requests/${id}/progress`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              note: workNotes,
+              checklist: checkedItems,
+            }),
+          }
+        );
 
-    // reload history จาก backend
-    const reload = await fetch(
-      `${API}/AdminManage/repair-requests/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        if (!res.ok) throw new Error("Failed to update progress");
       }
-    );
 
-    const updated = await reload.json();
+      // =========================
+      // cancel
+      // =========================
+      if (status === "cancelled") {
+        const res = await fetch(
+          `${API}/AdminManage/repair-requests/${id}/cancel`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              reason: workNotes,
+            }),
+          }
+        );
 
-    const historyArr = Array.isArray(updated.history)
-      ? updated.history
-      : Array.isArray(updated.progress)
-      ? updated.progress
-      : [];
+        if (!res.ok) throw new Error("Failed to cancel job");
 
+        // Create an update log for cancellation
+        const logRes = await fetch(
+          `${API}/AdminManage/repair-requests/${id}/progress`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              note: `ยกเลิกงาน: ${workNotes || "ไม่มีเหตุผลระบุ"}`,
+              checklist: [],
+              status: "cancelled",
+            }),
+          }
+        );
+    setReport(updated);
     setProgressHistory(historyArr);
 
-    // reset form
-    setWorkNotes("");
-    setCheckedState(new Array(CHECKLIST_ITEMS.length).fill(false));
-    setIsOtherChecked(false);
-    setOtherChecklistItem("");
+        if (!logRes.ok) console.error("Failed to create cancellation log");
+      }
 
-  } catch (err) {
-    alert(err.message);
-  }
-};
+      alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
+      navigate(`/requests/${id}`);
+
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   // ---------- Guards ----------
   if (loading) {
@@ -441,7 +446,7 @@ export default function UpdateProgress() {
         return (
           <div className={styles.buttonGroup}>
             <button type="button" className={styles.saveButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>
-              บันทึกการใช้จ่าย และปิดงาน
+              บันทึกค่าใช้จ่าย และปิดงาน
             </button>
             <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>
               ย้อนกลับ
@@ -473,7 +478,6 @@ export default function UpdateProgress() {
       </section>
 
       <main className={`container ${styles.mainGrid}`}>
-        {/* Left Panel */}
         <aside className={styles.leftPanel}>
           <Card className={styles.reportCard}>
             <img src={report.img} alt={report.titleEN || report.titleTH || "report"} className={styles.reportImage} />
@@ -499,7 +503,6 @@ export default function UpdateProgress() {
           </Card>
         </aside>
 
-        {/* Center Panel */}
         <section className={styles.centerPanel}>
           <Card className={styles.formCard}>
             <form onSubmit={handleSubmit}>
@@ -522,7 +525,6 @@ export default function UpdateProgress() {
           </Card>
         </section>
 
-        {/* Right Panel */}
         <aside className={styles.rightPanel}>
           <Card className={styles.historyCard}>
             <h2>ประวัติการอัปเดต</h2>
@@ -531,7 +533,7 @@ export default function UpdateProgress() {
                 <div key={index} className={styles.historyItem}>
                   <div className={`${styles.historyDot} ${statusToDotClass[item.status] || ""}`} />
                   <p className={styles.historyDate}>
-                    {item.timestamp 
+                    {item.timestamp
                     ? new Date(item.timestamp).toLocaleString("th-TH")
                     : item.date
                     ? new Date(item.date).toLocaleString("th-TH")

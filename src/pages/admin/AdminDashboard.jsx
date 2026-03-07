@@ -192,40 +192,83 @@ const latestStatusUpdates = useMemo(() => {
   if (!Array.isArray(reports) || reports.length === 0) return [];
 
   const statuses = ["pending", "accepted", "in_progress", "completed"];
-  
-  // 1. หาตัวที่ใหม่ที่สุดของแต่ละสถานะ
-  const updates = statuses.map((status) => {
-    // กรองเอาเฉพาะสถานะนี้และเรียงวันที่ล่าสุด
-    const latestForStatus = reports
-      .filter((r) => r.status?.toLowerCase() === status)
-      .sort((a, b) => new Date(b.dateEN) - new Date(a.dateEN))[0];
 
-    if (!latestForStatus) return null;
+  const config = {
+    pending: { text: "รายการใหม่", dot: "dot-amber", label: "แจ้งมาแล้ว" },
+    accepted: { text: "รับงาน", dot: "dot-purple", label: "รับมาแล้ว" },
+    in_progress: { text: "กำลังซ่อม", dot: "dot-blue", label: "ซ่อมมาแล้ว" },
+    completed: { text: "เสร็จสิ้น", dot: "dot-ok", label: "ปิดงานมาแล้ว" },
+  };
 
-    // 2. คำนวณความต่างของเวลา (Optional: ถ้าต้องการโชว์ว่าผ่านไปกี่วันแล้ว)
-    const reportDate = new Date(latestForStatus.dateEN);
-    const today = new Date();
-    const diffTime = Math.abs(today - reportDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const formatThaiDate = (value) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
 
-    // 3. กำหนดรายละเอียดการแสดงผล
-    const config = {
-      pending: { text: "รายการใหม่", dot: "dot-amber", label: "แจ้งมาแล้ว" },
-      accepted: { text: "รับงาน", dot: "dot-purple", label: "รับมาแล้ว" },
-      in_progress: { text: "กำลังซ่อม", dot: "dot-blue", label: "ซ่อมมาแล้ว" },
-      completed: { text: "เสร็จสิ้น", dot: "dot-ok", label: "ปิดงานมาแล้ว" },
+    return date.toLocaleDateString("th-TH", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getLatestStatusTimestamp = (report, status) => {
+    const history = Array.isArray(report.progress) ? report.progress : [];
+
+    const latestHistoryTimestamp = history
+      .filter((entry) => entry?.status?.toLowerCase?.() === status && entry?.timestamp)
+      .map((entry) => new Date(entry.timestamp))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .sort((a, b) => b - a)[0];
+
+    if (latestHistoryTimestamp) return latestHistoryTimestamp;
+
+    const fallbackMap = {
+      pending:
+        report.status?.toLowerCase() === "pending"
+          ? (report.updatedAt || report.createdAt)
+          : report.createdAt,
+      accepted: report.acceptedAt || report.updatedAt,
+      in_progress: report.startedAt || report.updatedAt,
+      completed: report.completedAt || report.updatedAt,
     };
 
-    return {
-      ...latestForStatus,
-      updateText: config[status].text,
-      dotClass: config[status].dot,
-      daysAgo: diffDays === 0 ? "วันนี้" : `${diffDays} วันที่แล้ว`,
-      timeLabel: config[status].label
-    };
-  }).filter(Boolean); // เอาเฉพาะสถานะที่มีข้อมูลจริง
+    const fallbackValue = fallbackMap[status];
+    if (!fallbackValue) return null;
 
-  return updates;
+    const fallbackDate = new Date(fallbackValue);
+    return Number.isNaN(fallbackDate.getTime()) ? null : fallbackDate;
+  };
+
+  return statuses
+    .map((status) => {
+      const latestForStatus = reports
+        .map((report) => ({
+          report,
+          statusDate: getLatestStatusTimestamp(report, status),
+        }))
+        .filter((item) => item.statusDate)
+        .sort((a, b) => b.statusDate - a.statusDate)[0];
+
+      if (!latestForStatus) return null;
+
+      const now = new Date();
+      const diffTime = Math.abs(now - latestForStatus.statusDate);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      return {
+        ...latestForStatus.report,
+        status,
+        updateText: config[status].text,
+        dotClass: config[status].dot,
+        daysAgo: diffDays === 0 ? "วันนี้" : `${diffDays} วันที่แล้ว`,
+        timeLabel: config[status].label,
+        displayDate: formatThaiDate(latestForStatus.statusDate),
+        statusDate: latestForStatus.statusDate,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.statusDate - a.statusDate);
 }, [reports]);
    
   const THEME_COLOR = "#c0392b";
@@ -398,20 +441,22 @@ const latestStatusUpdates = useMemo(() => {
             </div>
           </Card>
             <Card className="dash-side">
-              <div className="side-title">อัพเดทล่าสุดตามสถานะ / Status Updates</div>
-              <ul className="updates">
-                {latestStatusUpdates.map((item) => (
-                  <li key={`${item.id}-${item.status}`}>
-                      <span className={`dot ${item.dotClass}`} />
-                        {item.timeLabel}: {item.daysAgo} 
-                        ({item.dateTH})
-                  </li>
-                ))}
-                {latestStatusUpdates.length === 0 && (
-                  <li style={{ color: '#999', textAlign: 'center' }}>ไม่มีข้อมูลการอัปเดต</li>
-                )}
-              </ul>
-            </Card>
+        <div className="side-title">อัปเดตล่าสุดตามสถานะ / Status Updates</div>
+          <ul className="updates">
+            {latestStatusUpdates.map((item) => (
+              <li key={`${item.id}-${item.status}`}>
+                <span className={`dot ${item.dotClass}`} />
+                {item.timeLabel}: {item.daysAgo} ({item.displayDate})
+              </li>
+            ))}
+
+            {latestStatusUpdates.length === 0 && (
+              <li style={{ color: "#999", textAlign: "center" }}>
+                ไม่มีข้อมูลการอัปเดต
+              </li>
+            )}
+          </ul>
+        </Card>
         </div>
       </main>
     </>

@@ -42,11 +42,11 @@ export default function CostLogging() {
   const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    const fetchReport = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(
+        const reportRes = await fetch(
           `${API}/AdminManage/repair-requests/${id}`,
           {
             headers: {
@@ -55,10 +55,28 @@ export default function CostLogging() {
           }
         );
 
-        if (!res.ok) throw new Error("Report not found");
+        if (!reportRes.ok) throw new Error("Report not found");
 
-        const data = await res.json();
-        setReport(data);
+        const reportData = await reportRes.json();
+        setReport(reportData);
+
+        // Fetch existing costs
+        const costRes = await fetch(
+          `${API}/AdminAsset/repair-requests/${id}/costs`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (costRes.ok) {
+          const costData = await costRes.json();
+          setCostItems((costData || []).map(item => ({
+            ...item,
+            id: item.cost_id || item.id || new Date().getTime() + Math.random()
+          })));
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -66,8 +84,8 @@ export default function CostLogging() {
       }
     };
 
-    fetchReport();
-  }, [id]);
+    fetchData();
+  }, [id, API]);
 
   const [costItems, setCostItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -114,8 +132,33 @@ export default function CostLogging() {
     });
   };
 
-  const handleRemoveItem = (itemId) => {
-    setCostItems((prev) => prev.filter((item) => item.id !== itemId));
+  const handleRemoveItem = async (itemId) => {
+    // If the itemId is a GUID string, it exists in the database
+    const isGuid = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+    if (isGuid(itemId)) {
+      const confirmDelete = window.confirm("คุณต้องการลบรายการค่าใช้จ่ายนี้จากฐานข้อมูลใช่หรือไม่?");
+      if (!confirmDelete) return;
+
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API}/AdminAsset/costs/${itemId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("ไม่สามารถลบรายการค่าใช้จ่ายจากเซิร์ฟเวอร์ได้");
+        
+        alert("ลบรายการค่าใช้จ่ายเรียบร้อยแล้ว");
+      } catch (err) {
+        alert(err.message);
+        return;
+      }
+    }
+
+    setCostItems((prev) => prev.filter((item) => (item.cost_id || item.id) !== itemId));
   };
 
   const handleSaveAndContinue = async () => {
@@ -231,7 +274,7 @@ export default function CostLogging() {
                 className={styles.disabledInput}
               />
             </div>
-            <button type="submit" className={styles.confirmBtn}>✓</button>
+
 
             {/* Row 2 */}
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>

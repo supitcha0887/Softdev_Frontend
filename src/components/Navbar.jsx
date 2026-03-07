@@ -16,7 +16,7 @@ function IconBell() {
   );
 }
 
-export default function Navbar({ setNcOpen, unreadCount = 0 }) {
+export default function Navbar({ setNcOpen, unreadCount = 0, adminName = "STAFF-0024" }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isList = pathname.startsWith("/requests");
@@ -64,7 +64,7 @@ export default function Navbar({ setNcOpen, unreadCount = 0 }) {
 
         <div className="user-chip">
           <img className="user-icon" src={user} alt="status" />
-          <span>STAFF-0024</span>
+          <span>{adminName}</span>
         </div>
 
         <button

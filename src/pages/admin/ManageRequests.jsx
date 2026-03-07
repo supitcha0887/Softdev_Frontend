@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect} from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Pill } from "../../components/UI.jsx";
 import { STATUS} from "../../../data/mock.js";
 import { supabase } from "../../supabaseClient";
@@ -8,8 +9,10 @@ import { supabase } from "../../supabaseClient";
 
 export default function ManageRequests() {
   const [AdminData, setAdmin] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const [reports, setReports] = useState([]);
   // const [reportstat, setReportstat] = useState([]);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
@@ -22,7 +25,9 @@ export default function ManageRequests() {
   const [endDate, setEndDate] = useState("");
   const [sort, setSort] = useState("latest");
   const [page, setPage] = useState(1);
+  const [searchParams] = useSearchParams();
   const pageSize = 8;
+  const [searchParams] = useSearchParams();
 
 function statusToThai(status) {
   const s = String(status || "").toUpperCase().trim();
@@ -184,6 +189,47 @@ function statusToThai(status) {
     fetchCategory();
   
   }, []);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "accepted") {
+      setActiveTab("accepted");
+      setPage(1);
+    } else if (tab === "progress") {
+      setActiveTab("progress");
+      setPage(1);
+    } else if (tab === "done") {
+      setActiveTab("done");
+      setPage(1);
+    } else if (tab === "new") {
+      setActiveTab("new");
+      setPage(1);
+    } else if (tab === "all") {
+      setActiveTab("all");
+      setPage(1);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+  const tab = searchParams.get("tab");
+
+  if (tab === "accepted") {
+    setActiveTab("accepted");
+    setPage(1);
+  } else if (tab === "progress") {
+    setActiveTab("progress");
+    setPage(1);
+  } else if (tab === "done") {
+    setActiveTab("done");
+    setPage(1);
+  } else if (tab === "new") {
+    setActiveTab("new");
+    setPage(1);
+  } else if (tab === "all") {
+    setActiveTab("all");
+    setPage(1);
+  }
+}, [searchParams]);
+
   const filtered = useMemo(() => {
 
     if (!Array.isArray(reports)) return [];
@@ -193,6 +239,7 @@ function statusToThai(status) {
     if (activeTab === "progress") items = items.filter((i) => i.status === "IN_PROGRESS");
     if (activeTab === "done") items = items.filter((i) => i.status === "COMPLETED");
     if (activeTab === "accepted") items = items.filter((i) => i.status === "ACCEPTED");
+    if (activeTab === "myAccepted") items = items.filter((i) => i.assigned === AdminData.name && (i.status === "ACCEPTED" || i.status === "IN_PROGRESS"));
 
     if (status) items = items.filter((i) => i.status === status);
 
@@ -251,6 +298,7 @@ function statusToThai(status) {
   { key: "accepted", label: "รับงาน / Accepted", count: reports.filter(r => r.status === "ACCEPTED").length },
   { key: "progress", label: "กำลังดำเนินการ / In Progress", count: reports.filter(r => r.status === "IN_PROGRESS").length },
   { key: "done", label: "เสร็จสิ้น / Completed", count: reports.filter(r => r.status === "COMPLETED").length },
+  { key: "myAccepted", label: "งานที่ฉันรับ / My Accepted", count: reports.filter(r => r.assigned === AdminData.name && (r.status === "ACCEPTED" || r.status === "IN_PROGRESS")).length },
 ];
 
   return (

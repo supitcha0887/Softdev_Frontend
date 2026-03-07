@@ -188,9 +188,9 @@ export default function CloseJob() {
           <Card className={styles.sectionCard}>
             <h3 className={styles.sectionTitle}>สรุปงานซ่อม / Work Summary</h3>
             <div className={styles.summaryBox}>
-               <label>บันทึกการทำงาน</label>
+               <label>บันทึกการทำงาน / Work Notes</label>
                <div className={styles.workNotes}>
-                 {report.description || "ไม่มีบันทึกการทำงาน"}
+                 {report.work_notes || report.description || "ไม่มีบันทึกการทำงาน"}
                </div>
             </div>
             <div className={styles.infoGrid}>

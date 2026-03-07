@@ -60,17 +60,19 @@ function pillTextFromType(type) {
 
 function mapNotifToUi(n) {
   const createdAt = n.create_at ?? n.created_at ?? n.createdAt ?? null;
-  const tone = toneFromNotifType(n.type);
+  const rawType = String(n.type || "").toUpperCase().trim();
+  const tone = toneFromNotifType(rawType);
 
   return {
     id: n.id ?? n.notification_id,
     title: n.title ?? "แจ้งเตือนจากระบบ",
     desc: n.desc ?? n.description ?? "",
     read: !!(n.is_read ?? n.read),
-    requestId: n.related_report_id ?? n.requestId,
+    type: rawType,
+    requestId: n.related_report_id ?? n.reportId ?? n.requestId ?? null,
     statusKey: tone,
     pillTone: tone,
-    pillText: pillTextFromType(n.type),
+    pillText: pillTextFromType(rawType),
     timeAgo: timeAgo(createdAt),
     _createdAt: createdAt,
   };
@@ -181,6 +183,7 @@ function NotificationCenter({ open, onClose, items, markRead }) {
 
         <div className="nc-list">
           {visible.map((n) => (
+            
             <div key={n.id} className={`nc-item ${n.read ? "" : "nc-unread"}`}>
               <div className="nc-row1">
                 <span className={`nc-pill ${n.pillTone}`}>{n.pillText}</span>
@@ -188,19 +191,45 @@ function NotificationCenter({ open, onClose, items, markRead }) {
               </div>
 
               <div className="nc-main">
-                <div className="nc-main-title">{n.title}</div>
-                <div className="nc-main-desc">{n.desc}</div>
+                <div className="nc-main-title">
+                  {n.type === "ADMIN_SUMMARY"
+                    ? "งานที่ยังไม่เริ่มหลังรับงาน"
+                    : n.title}
+                </div>
 
-                <Link
-                  to={`/requests/${n.requestId}`}
-                  className="nc-link"
-                  onClick={() => {
-                    markRead(n.id);
-                    onClose?.();
-                  }}
-                >
-                  ดูรายละเอียดคำขอ →
-                </Link>
+                <div className="nc-main-desc">
+                  {n.type === "ADMIN_SUMMARY"
+                    ? "มีงานที่รับแล้วแต่ยังไม่ได้เริ่มดำเนินการ"
+                    : n.desc}
+                </div>
+
+                {n.requestId ? (
+                  <Link
+                    to={`/requests/${n.requestId}`}
+                    className="nc-link"
+                    onClick={() => {
+                      markRead(n.id);
+                      onClose?.();
+                    }}
+                  >
+                    ดูรายละเอียดคำขอ →
+                  </Link>
+                ) : n.type === "ADMIN_SUMMARY" ? (
+                  <Link
+                    to="/requests?tab=accepted"
+                    className="nc-link"
+                    onClick={() => {
+                      markRead(n.id);
+                      onClose?.();
+                    }}
+                  >
+                    ดูงานที่ยังไม่เริ่ม →
+                  </Link>
+                ) : (
+                  <span className="nc-link" style={{ color: "#64748b", cursor: "default" }}>
+                    การแจ้งเตือนจากระบบ
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -243,6 +272,7 @@ export default function Layout() {
   const [ncOpen, setNcOpen] = useState(false);
   const [notifs, setNotifs] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [adminName, setAdminName] = useState("STAFF-0024");
 
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
@@ -303,6 +333,21 @@ export default function Layout() {
   };
 
   useEffect(()=>{
+    const fetchAdminName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from("users")
+          .select("full_name")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile && !error) {
+          setAdminName(profile.full_name);
+        }
+      }
+    };
+    fetchAdminName();
     fetchNotifications();
     fetchUnreadCount();
   },[]);
@@ -366,7 +411,7 @@ export default function Layout() {
 
   return (
     <div className="app">
-      <Navbar setNcOpen={setNcOpen} unreadCount={unreadCount} />
+      <Navbar setNcOpen={setNcOpen} unreadCount={unreadCount} adminName={adminName} />
 
       <Outlet />
 
