@@ -5,6 +5,7 @@ import { Card, Pill } from "../../components/UI.jsx";
 
 import { supabase } from "../../supabaseClient";
 import styles from "./RequestDetail.module.css";
+import { useNotification } from "../../contexts/NotificationContext";
 
 import pending from "../../assets/pending.svg";
 import progress from "../../assets/progress.svg";
@@ -17,10 +18,12 @@ export default function RequestDetail() {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [AdminData, setAdmin] = useState("");
+  const { showToast } = useNotification();
 
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAllLogs, setShowAllLogs] = useState(false);
 
   function statusTone(status) {
     switch (status) {
@@ -144,16 +147,16 @@ export default function RequestDetail() {
       });
 
       if(acceptjob.ok){
-        alert("รับงานเรียบร้อย!");
+        showToast("รับงานเรียบร้อย!", "success");
         fetchReports();
       }else if (acceptjob.status === 401) {
       localStorage.removeItem("token");
       navigate("/");
       } else {
-      alert(`เกิดข้อผิดพลาด 500: ตรวจสอบรายละเอียดใน Console`);
+        showToast("เกิดข้อผิดพลาดในการรับงาน", "error");
       }     
     }catch(error){
-      alert("Connecting Error.")
+      showToast("Connecting Error.", "error")
     }
   }
 
@@ -170,17 +173,16 @@ export default function RequestDetail() {
       });
 
       if(cancelJob.ok){
-        alert("ยกเลิกงานที่รับมอบหมายเรียบร้อย!");
+        showToast("ยกเลิกงานที่รับมอบหมายเรียบร้อย!", "warning");
         fetchReports();
       }else if (cancelJob.status === 401) {
       localStorage.removeItem("token");
       navigate("/");
       } else {
-      const errorData = await cancelJob.text();
-      alert(`เกิดข้อผิดพลาด 500: ตรวจสอบรายละเอียดใน Console`);
+      showToast("เกิดข้อผิดพลาดในการยกเลิกงาน", "error");
       }     
     }catch(error){
-      alert("Connecting Error.")
+      showToast("Connecting Error.", "error")
     }
   };
 
@@ -490,7 +492,7 @@ const getLogConfig = (status) => {
           <div className="section-title">บันทึกกิจกรรม / Activity Log</div>
           <div className="activity">
             {/* 2. Loop ข้อมูลจาก history array */}
-            {Array.isArray(reports.history) && reports.history.map((log, index) => {
+            {(Array.isArray(reports.history) ? (showAllLogs ? reports.history : reports.history.slice(0, 4)) : []).map((log, index) => {
               const config = getLogConfig(log.status);
               return (
                 <div className="act" key={index}>
@@ -501,13 +503,22 @@ const getLogConfig = (status) => {
                       {log.updated_by && ` • โดย ${log.updated_by}`}
                     </div>
                     <div className="muted">
-                      {/* ถ้า Backend ส่ง timestamp มาใน log ให้ใช้ตัวนั้น */}
-                      By: {log.by} at: {reports.date}
+                      By: {log.by} at: {log.timestamp ? new Date(log.timestamp).toLocaleString("th-TH") : reports.date}
                     </div>
                   </div>
                 </div>
               );
             })}
+
+            {Array.isArray(reports.history) && reports.history.length > 4 && (
+              <button 
+                className="btn-link" 
+                onClick={() => setShowAllLogs(!showAllLogs)}
+                style={{ margin: '10px 40px', cursor: 'pointer', color: '#ef4444', border: 'none', background: 'none' }}
+              >
+                {showAllLogs ? "แสดงน้อยลง" : `แสดงเพิ่มเติม (${reports.history.length - 4})`}
+              </button>
+            )}
 
             {/* กรณีไม่มีประวัติเพิ่มเติม */}
             {(!reports.history || reports.history.length === 0) && (
@@ -517,6 +528,18 @@ const getLogConfig = (status) => {
             )}
           </div>
         </Card>
+
+        {reports.status === 'completed' && reports.image_after_url && (
+          <Card className="detail-wide">
+            <div className="section-title">รูปภาพหลังการซ่อม / After Repair Photo</div>
+            <div className="detail-img">
+              <img 
+                src={reports.image_after_url} 
+                alt="After Repair" 
+              />
+            </div>
+          </Card>
+        )}
       </div>
     </main>
   );

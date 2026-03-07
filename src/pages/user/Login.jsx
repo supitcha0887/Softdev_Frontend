@@ -6,9 +6,11 @@ import mailIcon from "../../assets/Mail.png";
 import eyeIcon from "../../assets/Eyes.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
+import { useNotification } from "../../contexts/NotificationContext";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { showToast } = useNotification();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ function LoginPage() {
   // ✅ ฟังก์ชัน Login หลัก
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("กรุณากรอกอีเมลและรหัสผ่าน");
+      showToast("กรุณากรอกอีเมลและรหัสผ่าน", "warning");
       return;
     }
 
@@ -47,17 +49,18 @@ function LoginPage() {
 
       if (res.ok) {
         const result = await res.json();
+        showToast("เข้าสู่ระบบสำเร็จ", "success");
         if (result.isAdmin) {
           navigate("/dashboard"); // ไปหน้า Admin Dashboard ถ้าเป็น Admin
         } else {
           navigate("/home"); // ไปหน้า Home ถ้าเป็น User ทั่วไป
         }
       } else {
-        alert(`การยืนยันตัวตนล้มเหลว (Status: ${res.status})`);
+        showToast(`การยืนยันตัวตนล้มเหลว (Status: ${res.status})`, "error");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Login failed: " + error.message);
+      showToast("Login failed: " + error.message, "error");
     } finally {
       setLoading(false);
     }

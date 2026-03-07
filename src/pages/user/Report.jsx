@@ -9,6 +9,7 @@ import RepairCard from "../../components/RepairCard";
 import { useNavigate } from "react-router-dom";
 import { supabase, getAccessToken } from "../../supabaseClient";
 import UserNavbar from "../../components/UserNavbar";
+import { useNotification } from "../../contexts/NotificationContext";
 
 // ================= DETAIL POPUP COMPONENT =================
 function Detail({ item, onClose }) {
@@ -129,6 +130,7 @@ function Detail({ item, onClose }) {
 // ================= REPORT COMPONENT =================
 function Report() {
   const navigate = useNavigate();
+  const { showToast } = useNotification();
   const [selectedItem, setSelectedItem] = useState(null);
   const [repairItems, setRepairItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -194,9 +196,11 @@ function Report() {
           assetNo: item.asset_number || null,
         }));
         setRepairItems(mappedData);
+      } else {
+        showToast("ไม่สามารถดึงข้อมูลรายการแจ้งซ่อมได้", "error");
       }
     } catch (error) {
-      console.error("Error connecting to server:", error);
+      showToast("Error connecting to server:" + error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -228,7 +232,7 @@ function Report() {
         }));
       }
     } catch (error) {
-      console.error("Error fetching full details:", error);
+      showToast("Error fetching full details:" + error.message, "error");
     }
   };
 

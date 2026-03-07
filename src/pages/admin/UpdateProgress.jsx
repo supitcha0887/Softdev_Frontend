@@ -4,6 +4,7 @@ import { Card, Pill } from "../../components/UI";
 import styles from "./UpdateProgress.module.css";
 import { compressImage, formatFileSize } from "../../utils/imageUtils";
 import { supabase } from "../../supabaseClient";
+import { useNotification } from "../../contexts/NotificationContext";
 
 // Mock icons for meta details, replace with actual icons if available
 const LocationIcon = () => "📍";
@@ -41,6 +42,7 @@ export default function UpdateProgress() {
   const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const { showToast } = useNotification();
 
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -212,6 +214,8 @@ export default function UpdateProgress() {
       // in_progress
       // =========================
       if (status === "in_progress") {
+        // 1. Add a progress log entry with the specified note
+        const progressNote = workNotes.trim() === "" ? "กำลังดำเนินการ" : workNotes;
         const res = await fetch(
           `${API}/AdminManage/repair-requests/${id}/progress`,
           {
@@ -221,18 +225,79 @@ export default function UpdateProgress() {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              note: workNotes,
+              note: progressNote,
               checklist: checkedItems,
+              status: "in_progress", // Explicitly set status for the log entry
             }),
           }
         );
 
-        if (!res.ok) throw new Error("Failed to update progress");
+        if (!res.ok) throw new Error("Failed to add progress log");
       }
 
       // =========================
       // cancel
       // =========================
+      if (status === "completed") {
+        let imageAfterUrl = report?.image_after_url; // Use existing URL if no new image
+
+        if (imageFile) {
+          // Upload image to Supabase Storage
+          const { data, error: uploadError } = await supabase.storage
+            .from("report-images")
+            .upload(`${id}/after-${Date.now()}-${imageFile.name}`, imageFile, {
+              cacheControl: "3600",
+              upsert: false,
+            });
+
+          if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+          
+          // Get public URL
+          const { data: publicUrlData } = supabase.storage
+            .from("report-images")
+            .getPublicUrl(data.path);
+          imageAfterUrl = publicUrlData.publicUrl;
+        }
+
+        // Update report status, work notes, and image_after_url
+        const res = await fetch(
+          `${API}/AdminManage/repair-requests/${id}/complete-with-image`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              status: "completed", // Although backend changes this to completed, explicitly send for clarity
+              note: workNotes,
+              imageAfterUrl: imageAfterUrl,
+            }),
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to complete job and save image.");
+
+        // Add progress log for completion
+        const logRes = await fetch(
+          `${API}/AdminManage/repair-requests/${id}/progress`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              note: workNotes.trim() === "" ? "งานซ่อมเสร็จสิ้น" : workNotes,
+              checklist: checkedItems,
+              status: "completed",
+            }),
+          }
+        );
+
+        if (!logRes.ok) console.error("Failed to create completion log");
+      }
+
       if (status === "cancelled") {
         const res = await fetch(
           `${API}/AdminManage/repair-requests/${id}/cancel`,
@@ -249,32 +314,21 @@ export default function UpdateProgress() {
         );
 
         if (!res.ok) throw new Error("Failed to cancel job");
-
-        // Create an update log for cancellation
-        const logRes = await fetch(
-          `${API}/AdminManage/repair-requests/${id}/progress`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              note: `ยกเลิกงาน: ${workNotes || "ไม่มีเหตุผลระบุ"}`,
-              checklist: [],
-              status: "cancelled",
-            }),
-          }
-        );
-
-        if (!logRes.ok) console.error("Failed to create cancellation log");
       }
 
-      alert(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`);
+      if (status === "cancelled") {
+        showToast("งานซ่อมถูกยกเลิกและส่งกลับไปรอรับงานแล้ว", "warning");
+      } else if (status === "completed") {
+        showToast("งานซ่อมเสร็จสิ้นแล้ว! คุณสามารถบันทึกค่าใช้จ่ายได้ในหน้าถัดไป", "success");
+        navigate(`/requests/${id}/cost-logging`);
+        return;
+      } else {
+        showToast(`ดำเนินการสถานะ "${STATUS_TH[status]}" สำเร็จ!`, "success");
+      }
       navigate(`/requests/${id}`);
 
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   };
 
@@ -443,7 +497,7 @@ export default function UpdateProgress() {
       case "completed":
         return (
           <div className={styles.buttonGroup}>
-            <button type="button" className={styles.saveButton} onClick={() => navigate(`/requests/${id}/cost-logging`)}>
+            <button type="submit" className={styles.saveButton}>
               บันทึกค่าใช้จ่าย และปิดงาน
             </button>
             <button type="button" className={styles.backButton} onClick={() => navigate(`/requests/${id}`)}>

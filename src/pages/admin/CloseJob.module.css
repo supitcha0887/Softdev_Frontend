@@ -106,11 +106,27 @@
 .timelineDot {
     width: 12px;
     height: 12px;
-    background-color: #22c55e;
+    background-color: #cbd5e1; /* Default grey */
     border-radius: 50%;
     margin-top: 5px;
     flex-shrink: 0;
     z-index: 1;
+}
+
+.timelineDot.pending {
+    background-color: #f59e0b; /* Orange/Yellow */
+}
+
+.timelineDot.accepted {
+    background-color: #64748b; /* Slate/Grey */
+}
+
+.timelineDot.in_progress {
+    background-color: #3b82f6; /* Blue */
+}
+
+.timelineDot.completed {
+    background-color: #22c55e; /* Green */
 }
 
 .timelineItem:not(:last-child)::after {

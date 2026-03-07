@@ -665,9 +665,11 @@ select { min-width: 180px; }
 /* ── Status Timeline ──────────────────────────────── */
 .statusbar {
   display: flex;
-  gap: 0;
   align-items: flex-start;
   padding: 8px 0 0;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 800px;
 }
 
 .status-step {

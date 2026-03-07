@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card } from "../../components/UI";
 // import { reports as mockReports, addRepairCost } from "../../../data/mock";
 import styles from "./CostLogging.module.css";
+import { useNotification } from "../../contexts/NotificationContext";
 
 // Simple SVG Icon for the empty state
 const EmptyIcon = () => (
@@ -38,6 +39,7 @@ export default function CostLogging() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showToast } = useNotification();
 
   const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -108,7 +110,7 @@ export default function CostLogging() {
   const handleAddItem = (e) => {
     e.preventDefault();
     if (!newItem.item_name || newItem.unit_price <= 0) {
-      alert("Please fill in at least Item Name and Unit Price.");
+      showToast("Please fill in at least Item Name and Unit Price.", "warning");
       return;
     }
 
@@ -151,9 +153,9 @@ export default function CostLogging() {
 
         if (!res.ok) throw new Error("ไม่สามารถลบรายการค่าใช้จ่ายจากเซิร์ฟเวอร์ได้");
         
-        alert("ลบรายการค่าใช้จ่ายเรียบร้อยแล้ว");
+        showToast("ลบรายการค่าใช้จ่ายเรียบร้อยแล้ว", "info");
       } catch (err) {
-        alert(err.message);
+        showToast(err.message, "error");
         return;
       }
     }
@@ -190,12 +192,12 @@ export default function CostLogging() {
 
         const data = await res.json();
 
-        alert(data.message || "บันทึกรายการค่าใช้จ่ายเรียบร้อย");
+        showToast(data.message || "บันทึกรายการค่าใช้จ่ายเรียบร้อย", "success");
       }
 
       navigate(`/requests/${id}/close-job`);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   };
 

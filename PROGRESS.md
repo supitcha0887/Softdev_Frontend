@@ -83,11 +83,11 @@ The application's security and navigation are handled in a clear, two-step proce
 
 ## 4. Key Dependencies
 
-- `react`: v19.2.0
-- `react-router-dom`: v7.13.0
-- `@supabase/supabase-js`: v2.97.0
-- `recharts`: v3.7.0 (for admin charts)
-- `vite`: v7.3.1
+- `react`: ^19.2.0
+- `react-router-dom`: ^7.13.0
+- `@supabase/supabase-js`: ^2.97.0
+- `recharts`: ^3.7.0 (for admin charts
+- `vite`: ^7.3.1
 
 ---
 
@@ -100,10 +100,11 @@ The application's security and navigation are handled in a clear, two-step proce
 -   **User Reporting Workflow:** The entire flow for a user to create and submit a detailed repair request is functional, including cascading selects and image compression/upload.
 -   **Admin Dashboard:** A data-rich, live dashboard provides admins with key statistics and visualizations.
 -   **Admin Management Workflow:** The end-to-end process for an admin to view, accept, update, and manage a repair request is implemented and connected to the backend API.
+-   **Manage Requests Page:** The `ManageRequests` page is fully migrated to use the ASP.NET API for data fetching and management, no longer relying on `mock.js`.
 
 #### 🔄 **In Progress / TODO**
 
--   **Complete API Migration:** Verify that all admin pages (`ManageRequests`, `RequestDetail`, `CostLogging`, `CloseJob`) are fully migrated from `mock.js` to the ASP.NET API, following the pattern set by `AdminDashboard` and `UpdateProgress`.
+-   **Complete API Migration:** Verify that all admin pages (`RequestDetail`, `CostLogging`, `CloseJob`) are fully migrated from `mock.js` to the ASP.NET API, following the pattern set by `AdminDashboard` and `UpdateProgress`.
 -   **Real-time Notifications:** The current notification system relies on fetching counts on load. A future improvement could involve real-time updates using Supabase Realtime or WebSockets.
 -   **Admin User/Asset Management:** UI/API for direct management of users and assets (inventory) are not yet implemented.
 -   **Error Handling & Edge Cases:** Continue to refine user-facing error messages and handle potential API/network failure scenarios gracefully across the application.

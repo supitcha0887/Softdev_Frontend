@@ -4,6 +4,7 @@ import UserNavbar from "../../components/UserNavbar";
 import Footer from "../../components/Footer";
 import RepairCard from "../../components/RepairCard";
 import { supabase } from "../../supabaseClient";
+import { useNotification } from "../../contexts/NotificationContext";
 
 function MyReports() {
   const [myReports, setMyReports] = useState([]);
@@ -14,6 +15,7 @@ function MyReports() {
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { showToast } = useNotification();
 
   useEffect(() => {
     fetchReports();
@@ -56,7 +58,7 @@ function MyReports() {
       setOtherReports(others);
 
     } catch (err) {
-      console.error("Error fetching reports:", err);
+      showToast("Error fetching reports: " + err.message, "error");
       setError(err.message);
     } finally {
       setLoading(false);

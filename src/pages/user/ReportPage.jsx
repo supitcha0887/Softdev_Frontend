@@ -5,9 +5,11 @@ import UserNavbar from '../../components/UserNavbar';
 import Footer from '../../components/Footer';
 import { supabase, getAccessToken } from '../../supabaseClient';
 import { compressImage, formatFileSize } from '../../utils/imageUtils';
+import { useNotification } from '../../contexts/NotificationContext';
 
 function ReportPage() {
   const [imagePreview, setImagePreview] = useState(null);
+  const { showToast } = useNotification();
   const [imageFile, setImageFile] = useState(null);
   const [originalFileSize, setOriginalFileSize] = useState(null);
   const [compressedFileSize, setCompressedFileSize] = useState(null);
@@ -36,12 +38,12 @@ function ReportPage() {
 
       // Fetch locations
       const { data: locationsData, error: locationsError } = await supabase.from('locations').select('location_id, building, floor, room');
-      if (locationsError) console.error('Error fetching locations:', locationsError);
+      if (locationsError) showToast('Error fetching locations: ' + locationsError.message, 'error');
       else setLocations(locationsData);
 
       // Fetch asset categories
       const { data: categoriesData, error: categoriesError } = await supabase.from('asset_categories').select('category_id, type_name');
-      if (categoriesError) console.error('Error fetching asset categories:', categoriesError);
+      if (categoriesError) showToast('Error fetching asset categories: ' + categoriesError.message, 'error');
       else setAssetCategories(categoriesData);
     };
 
@@ -60,14 +62,14 @@ function ReportPage() {
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)");
+      showToast("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (.jpg, .jpeg, .png, .gif, .webp)", "warning");
       e.target.value = null;
       return;
     }
 
     // 1. Check original file size limit
     if (file.size > 10 * 1024 * 1024) {
-      alert("ขนาดไฟล์ต้องไม่เกิน 10 MB กรุณาเลือกรูปใหม่");
+      showToast("ขนาดไฟล์ต้องไม่เกิน 10 MB กรุณาเลือกรูปใหม่", "warning");
       e.target.value = null;
       return;
     }
@@ -82,8 +84,7 @@ function ReportPage() {
       setCompressedFileSize(formatFileSize(compressedFile.size));
       setImagePreview(URL.createObjectURL(compressedFile));
     } catch (error) {
-      console.error("Image compression failed:", error);
-      alert("เกิดข้อผิดพลาดในการบีบอัดรูปภาพ");
+      showToast("เกิดข้อผิดพลาดในการบีบอัดรูปภาพ: " + error.message, "error");
       setImageFile(null);
       setImagePreview(null);
       setOriginalFileSize(null);
@@ -121,7 +122,7 @@ function ReportPage() {
         .eq('category_id', selectedCategoryId)
         .eq('status', 'active');
       
-      if (assetsError) console.error('Error fetching assets:', assetsError);
+      if (assetsError) showToast('Error fetching assets: ' + assetsError.message, 'error');
       else setAssets(assetsData);
     }
   };
@@ -156,8 +157,7 @@ function ReportPage() {
         .upload(`${Date.now()}_${imageFile.name}`, imageFile);
 
       if (error) {
-        console.error('Error uploading image:', error);
-        setErrors({ api: 'Failed to upload image.' });
+        showToast('Failed to upload image: ' + error.message, 'error');
         setLoading(false);
         return;
       }
@@ -174,8 +174,7 @@ function ReportPage() {
       .single();
 
     if (userError) {
-      console.error('Error fetching user phone:', userError);
-      setErrors({ api: 'Could not retrieve user details.' });
+      showToast('Could not retrieve user details: ' + userError.message, 'error');
       setLoading(false);
       return;
     }
@@ -202,21 +201,14 @@ function ReportPage() {
       });
 
       if (response.ok) {
-        alert('แจ้งซ่อมสำเร็จ!');
+        showToast('แจ้งซ่อมสำเร็จ!', 'success');
         navigate('/home');
       } else {
         const text = await response.text();
-        console.error('API Error Text:', text);
-        try {
-          const errorData = JSON.parse(text);
-          setErrors({ api: `Failed to submit report: ${errorData.message || 'Unknown error'}` });
-        } catch {
-          setErrors({ api: `Failed to submit report: Server returned a non-JSON error.` });
-        }
+        showToast('Failed to submit report: ' + text, 'error');
       }
     } catch (error) {
-      console.error('Network or other error:', error);
-      setErrors({ api: 'Cannot connect to the server.' });
+      showToast('Cannot connect to the server: ' + error.message, 'error');
     } finally {
       setLoading(false);
     }

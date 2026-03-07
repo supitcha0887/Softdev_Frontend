@@ -3,10 +3,20 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, Pill } from "../../components/UI";
 // import { reports as mockReports, repair_costs, updateReportStatus, STATUS } from "../../../data/mock";
 import styles from "./CloseJob.module.css";
+import { useNotification } from "../../contexts/NotificationContext";
+
+const STATUS_TH = {
+  pending: "รอรับงาน",
+  accepted: "รับงานแล้ว",
+  in_progress: "กำลังดำเนินการ",
+  completed: "เสร็จสิ้น",
+  cancelled: "ยกเลิก",
+};
 
 export default function CloseJob() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useNotification();
 
   const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -93,11 +103,11 @@ export default function CloseJob() {
 
       if (!res.ok) throw new Error("Failed to close job");
 
-      alert("ปิดงานซ่อมเรียบร้อยแล้ว");
+      showToast("ปิดงานซ่อมเรียบร้อยแล้ว", "success");
       navigate("/requests");
 
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   };
 
@@ -163,21 +173,38 @@ export default function CloseJob() {
           <Card className={styles.sectionCard}>
             <h3 className={styles.sectionTitle}>สถานะการดำเนินงาน / Status Timeline</h3>
             <div className={styles.timeline}>
-              {report.progress && Array.isArray(report.progress) ? (
-                report.progress.map((step, idx) => (
-                  <div key={idx} className={styles.timelineItem}>
-                    <div className={styles.timelineDot} />
-                    <div className={styles.timelineContent}>
-                      <div className={styles.timelineHeader}>
-                        <strong>{step.title}</strong>
-                        <span className={styles.timelineDate}>
-                          {new Date(step.date).toLocaleString("th-TH")}
-                        </span>
+               {report.history && Array.isArray(report.history) && report.history.length > 0 ? (
+                report.history.map((step, idx) => {
+                  const statusText = STATUS_TH[String(step.status).toLowerCase()] || step.status || "อัปเดต";
+                  const tone = String(step.status).toLowerCase();
+                  return (
+                    <div key={idx} className={styles.timelineItem}>
+                      <div className={`${styles.timelineDot} ${styles[tone] || ""}`} />
+                      <div className={styles.timelineContent}>
+                        <div className={styles.timelineHeader}>
+                          <strong>{statusText}</strong>
+                          <span className={styles.timelineDate}>
+                            {step.timestamp
+                              ? new Date(step.timestamp).toLocaleString("th-TH")
+                              : new Date().toLocaleString("th-TH")}
+                          </span>
+                        </div>
+                        {step.note && <p className={styles.timelineNote}>{step.note}</p>}
+                        {step.by && <p className={styles.timelineBy}>โดย: {step.by}</p>}
+                        {step.checklist && Array.isArray(step.checklist) && step.checklist.length > 0 && (
+                          <div className={styles.timelineChecklist}>
+                            <strong>ขั้นตอนที่ทำ:</strong>
+                            <ul>
+                              {step.checklist.map((checkItem, checkIdx) => (
+                                <li key={checkIdx}>{checkItem}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                      {step.description && <p>{step.description}</p>}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className={styles.muted}>ไม่มีข้อมูลความคืบหน้า</p>
               )}

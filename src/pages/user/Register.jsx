@@ -5,9 +5,11 @@ import mailIcon from "../../assets/Mail.png";
 import eyeIcon from "../../assets/Eyes.png";
 import bgImage from "../../assets/BG.jpg";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../contexts/NotificationContext";
 
 function Register() {
   const navigate = useNavigate();
+  const { showToast } = useNotification();
 
   // 1. สร้าง State สำหรับเก็บค่าที่ตรงกับ Database
   const [email, setEmail] = useState("");
@@ -23,7 +25,7 @@ function Register() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("รหัสผ่านไม่ตรงกัน!");
+      showToast("รหัสผ่านไม่ตรงกัน!", "warning");
       return;
     }
 
@@ -42,9 +44,9 @@ function Register() {
     });
 
     if (error) {
-      alert("เกิดข้อผิดพลาด: " + error.message);
+      showToast("เกิดข้อผิดพลาด: " + error.message, "error");
     } else {
-      alert("ลงทะเบียนสำเร็จ! โปรดตรวจสอบอีเมลยืนยัน");
+      showToast("ลงทะเบียนสำเร็จ! โปรดตรวจสอบอีเมลยืนยัน", "success");
       navigate("/");
     }
     setLoading(false);

@@ -26,7 +26,6 @@ export default function ManageRequests() {
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const pageSize = 8;
-  const [searchParams] = useSearchParams();
 
 function statusToThai(status) {
   const s = String(status || "").toUpperCase().trim();
