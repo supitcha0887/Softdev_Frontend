@@ -104,8 +104,24 @@ export default function CostLogging() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewItem((prev) => ({ ...prev, [name]: value }));
+
+    let newValue = value;
+
+    if (name === "quantity") {
+      newValue = Math.max(1, Number(value)); // อย่างน้อยต้องเป็น 1
+    }
+
+    if (name === "unit_price") {
+      newValue = Math.max(0.01, Number(value)); // อย่างน้อยต้องเป็น 0.01
+    }
+
+    setNewItem({
+      ...newItem,
+      [name]: newValue,
+    });
   };
+
+  
 
   const handleAddItem = (e) => {
     e.preventDefault();
