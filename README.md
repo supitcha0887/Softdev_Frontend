@@ -1,4 +1,4 @@
-# Softdev Frontend (Personal Version)
+# Softdev Frontend (Group Project)
 
 ## 📌 About This Project
 
